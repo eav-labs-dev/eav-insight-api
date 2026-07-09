@@ -2,14 +2,34 @@
 
 ## Summary
 
-FastAPI backend for document intake, operational reporting, and searchable business records.
+EAV Insight API is a FastAPI backend for document intake, operational reporting, and searchable business records.
 
-## Portfolio Purpose
+## Target Users
 
-Backend API design, database modelling, Dockerized development, automated testing, CI/CD, and deployment-ready architecture.
+- operations managers
+- analysts
+- field teams
+- SMEs
+- document-heavy teams
 
-## Development Status
+## Core Problem
 
-This project is being rebuilt as part of the EAV Labs portfolio sprint.
+Business teams often store reports, documents, invoices, and field records in scattered systems. Searching, categorizing, and tracking these records becomes difficult as the organization grows.
 
-The rebuild is transparent: old repository content has been replaced with a clean project foundation, and new work will be committed from this point forward.
+## MVP Scope
+
+- user authentication
+- organization support
+- report/document records
+- tags/categories
+- search and filtering
+- pagination
+- background processing placeholder
+- OpenAPI documentation
+- tests
+- Docker Compose
+- CI pipeline
+
+## Portfolio Value
+
+This project demonstrates Python backend engineering, API design, database modelling, Dockerized development, automated testing, CI, and deployment-ready documentation.

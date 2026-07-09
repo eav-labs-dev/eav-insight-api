@@ -1,0 +1,45 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eav-insight-api
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - .:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  db:
+    image: postgres:16-alpine
+    container_name: eav-insight-db
+    environment:
+      POSTGRES_DB: eav_insight
+      POSTGRES_USER: eav
+      POSTGRES_PASSWORD: eav_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - eav_insight_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eav -d eav_insight"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: eav-insight-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - eav_insight_redis:/data
+
+volumes:
+  eav_insight_postgres:
+  eav_insight_redis:
