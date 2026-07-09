@@ -48,6 +48,18 @@ ReDoc documentation:
 http://localhost:8000/redoc
 ```
 
+## Data Model Areas
+
+The current database foundation includes:
+
+- organizations
+- users
+- reports
+- documents
+- tags
+
+See [`database.md`](database.md) for table and migration notes.
+
 ## Planned API Areas
 
 - authentication

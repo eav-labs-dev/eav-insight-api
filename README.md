@@ -18,6 +18,9 @@ Current foundation:
 - Versioned API route prefix
 - Health check endpoint
 - Central settings/config system
+- SQLAlchemy database models
+- Alembic migration setup
+- Demo seed data script
 - Dockerfile
 - Docker Compose with PostgreSQL and Redis
 - Pytest test suite
@@ -114,6 +117,33 @@ Remove volumes if you want a clean database reset:
 docker compose down -v
 ```
 
+## Database Commands
+
+Start PostgreSQL only:
+
+```bash
+docker compose up -d db
+```
+
+Run database migrations:
+
+```bash
+alembic upgrade head
+```
+
+Seed demo data:
+
+```bash
+python scripts/seed_demo_data.py
+```
+
+Or use the Makefile:
+
+```bash
+make db-upgrade
+make seed
+```
+
 ## Test Commands
 
 Run tests:
@@ -159,10 +189,20 @@ make dev
 │   │   └── routes.py
 │   ├── core/
 │   │   └── config.py
+│   ├── db/
+│   │   └── session.py
+│   ├── models/
+│   │   ├── organization.py
+│   │   ├── user.py
+│   │   ├── report.py
+│   │   ├── document.py
+│   │   └── tag.py
 │   ├── schemas/
 │   │   └── health.py
 │   └── main.py
+├── alembic/
 ├── docs/
+├── scripts/
 ├── tests/
 ├── .github/workflows/ci.yml
 ├── docker-compose.yml

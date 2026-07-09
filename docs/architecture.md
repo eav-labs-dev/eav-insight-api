@@ -15,7 +15,11 @@ Versioned API routes: /api/v1
   ↓
 Schemas and services
   ↓
-PostgreSQL / Redis planned for MVP data workflows
+SQLAlchemy models
+  ↓
+PostgreSQL for persisted business records
+  ↓
+Redis planned for background processing workflows
 ```
 
 ## Application Layers
@@ -25,13 +29,14 @@ PostgreSQL / Redis planned for MVP data workflows
 | `app/main.py` | application factory, middleware, router registration |
 | `app/api/` | API route definitions |
 | `app/core/` | settings, configuration, shared utilities |
+| `app/db/` | SQLAlchemy engine, sessions, and database dependencies |
+| `app/models/` | database models and relationships |
 | `app/schemas/` | request/response models |
 | `tests/` | automated tests |
 
 ## Planned MVP Components
 
-- SQLAlchemy models for users, organizations, reports, documents, and tags
-- Alembic migrations
+- CRUD service layer for reports, documents, and tags
 - authentication and authorization foundation
 - search/filtering service layer
 - pagination utilities
