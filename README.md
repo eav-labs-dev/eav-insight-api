@@ -6,33 +6,175 @@ FastAPI backend for document intake, operational reporting, and searchable busin
 
 This repository is part of the EAV Labs portfolio rebuild and is currently under active development.
 
-## About
+## What This Project Demonstrates
 
-EAV Insight API is a production-style software project under **EAV Labs**, the personal engineering portfolio of Enam/Kwame Avornyo.
+EAV Insight API is designed as a production-style backend service. It demonstrates backend API design, typed Python development, environment-based configuration, Dockerized local development, automated testing, CI, and documentation discipline.
 
-The goal is to demonstrate practical engineering through clear documentation, clean structure, real commits, tests, Dockerized development, and deployment-ready thinking.
+## Core Features
+
+Current foundation:
+
+- FastAPI application factory
+- Versioned API route prefix
+- Health check endpoint
+- Central settings/config system
+- Dockerfile
+- Docker Compose with PostgreSQL and Redis
+- Pytest test suite
+- Ruff linting setup
+- GitHub Actions CI workflow
+- Documentation folder
+
+Planned MVP features:
+
+- user authentication
+- organization support
+- report/document records
+- tags/categories
+- search and filtering
+- pagination
+- background processing placeholder
+- OpenAPI documentation
+- seed/demo data
 
 ## Tech Stack
 
-Python, FastAPI, PostgreSQL, Redis, Docker, GitHub Actions, Pytest.
+- Python 3.12
+- FastAPI
+- PostgreSQL
+- Redis
+- Docker / Docker Compose
+- Pytest
+- Ruff
+- GitHub Actions
 
-## Planned MVP Features
+## Local Development
 
-The MVP scope will be built incrementally with real commits and documented progress.
+### 1. Create and activate a virtual environment
 
-## Repository Standard
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
 
-This repo will include:
+### 2. Install dependencies
 
-- Clear README
-- Setup instructions
-- Environment example
-- Tests
-- CI workflow
-- Documentation
-- Roadmap
-- Docker support where applicable
+```bash
+python -m pip install --upgrade pip
+pip install -e ".[dev]"
+```
 
-## What This Project Demonstrates
+### 3. Create environment file
 
-Backend API design, database modelling, Dockerized development, automated testing, CI/CD, and deployment-ready architecture.
+```bash
+cp .env.example .env
+```
+
+### 4. Run the API locally
+
+```bash
+uvicorn app.main:app --reload
+```
+
+The API should be available at:
+
+```text
+http://localhost:8000
+```
+
+Swagger/OpenAPI docs:
+
+```text
+http://localhost:8000/docs
+```
+
+Health endpoint:
+
+```text
+http://localhost:8000/api/v1/health
+```
+
+## Docker Development
+
+Start the API, PostgreSQL, and Redis:
+
+```bash
+docker compose up --build
+```
+
+Stop services:
+
+```bash
+docker compose down
+```
+
+Remove volumes if you want a clean database reset:
+
+```bash
+docker compose down -v
+```
+
+## Test Commands
+
+Run tests:
+
+```bash
+pytest
+```
+
+Run linting:
+
+```bash
+ruff check .
+```
+
+Format code:
+
+```bash
+ruff format .
+```
+
+Or use the Makefile:
+
+```bash
+make install
+make test
+make lint
+make dev
+```
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/` | Basic service metadata |
+| GET | `/api/v1/health` | Health check endpoint |
+
+## Project Structure
+
+```text
+.
+├── app/
+│   ├── api/
+│   │   └── routes.py
+│   ├── core/
+│   │   └── config.py
+│   ├── schemas/
+│   │   └── health.py
+│   └── main.py
+├── docs/
+├── tests/
+├── .github/workflows/ci.yml
+├── docker-compose.yml
+├── Dockerfile
+├── Makefile
+└── pyproject.toml
+```
+
+## Roadmap
+
+See [`docs/roadmap.md`](docs/roadmap.md).
+
+## Portfolio Value
+
+This project is intended to show that EAV Labs can design and ship a clean backend service with practical product thinking, documented setup, automated checks, and deployment-ready structure.
