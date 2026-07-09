@@ -13,14 +13,14 @@
 
 ## Phase 2 — Data Model
 
-- [ ] add SQLAlchemy models
-- [ ] add Alembic migrations
-- [ ] create users table
-- [ ] create organizations table
-- [ ] create reports table
-- [ ] create documents table
-- [ ] create tags table
-- [ ] add seed/demo data
+- [x] add SQLAlchemy models
+- [x] add Alembic migrations
+- [x] create users table
+- [x] create organizations table
+- [x] create reports table
+- [x] create documents table
+- [x] create tags table
+- [x] add seed/demo data
 
 ## Phase 3 — API MVP
 

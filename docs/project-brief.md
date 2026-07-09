@@ -18,10 +18,10 @@ Business teams often store reports, documents, invoices, and field records in sc
 
 ## MVP Scope
 
-- user authentication
 - organization support
 - report/document records
 - tags/categories
+- user authentication
 - search and filtering
 - pagination
 - background processing placeholder
