@@ -9,6 +9,7 @@
 - [x] Docker Compose with PostgreSQL and Redis
 - [x] Pytest foundation
 - [x] GitHub Actions CI
+- [x] Docker and CI workflow polish
 - [x] documentation folder
 
 ## Phase 2 — Data Model
@@ -45,8 +46,17 @@
 
 ## Phase 5 — Portfolio Polish
 
-- [ ] add CI badge
+- [ ] add CI badge after repository path is finalized
 - [ ] add architecture diagram
 - [ ] add screenshots or Swagger screenshots
 - [x] add deployment notes
 - [ ] create LinkedIn launch summary
+
+## Phase 6 — Delivery Readiness
+
+- [x] add Docker Compose service health checks
+- [x] add CI migration check
+- [x] add CI Docker image build check
+- [x] document local and Docker development workflows
+- [ ] add deployment target notes once platform is selected
+- [ ] add production CORS/domain configuration notes
