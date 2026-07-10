@@ -14,6 +14,7 @@ def test_core_models_can_be_created_with_relationships() -> None:
             organization=organization,
             email="owner@example.com",
             full_name="Demo Owner",
+            password_hash="test-password-hash",
             role="admin",
         )
         tag = Tag(organization=organization, name="Operations", slug="operations")

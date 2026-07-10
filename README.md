@@ -23,6 +23,7 @@ Current foundation:
 - Demo seed data script
 - Report CRUD endpoints
 - Document CRUD endpoints
+- User registration and JWT authentication foundation
 - Basic search, filtering, and pagination
 - Dockerfile
 - Docker Compose with PostgreSQL and Redis
@@ -33,7 +34,7 @@ Current foundation:
 
 Planned MVP features:
 
-- user authentication
+- organization-scoped authorization
 - organization and user API endpoints
 - tag management endpoints
 - background processing placeholder
@@ -117,6 +118,27 @@ Remove volumes if you want a clean database reset:
 docker compose down -v
 ```
 
+## Authentication Configuration
+
+Local authentication uses JWT bearer tokens and salted password hashes. Create a real secret in `.env` before running anything outside local development:
+
+```bash
+JWT_SECRET_KEY=replace-with-a-long-random-secret
+JWT_ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+PASSWORD_HASH_ITERATIONS=600000
+```
+
+Current auth endpoints:
+
+```text
+POST /api/v1/auth/register
+POST /api/v1/auth/token
+GET  /api/v1/auth/me
+```
+
+The report and document endpoints are not fully organization-authorized yet. That is the next backend security step.
+
 ## Database Commands
 
 Start PostgreSQL only:
@@ -179,6 +201,9 @@ make dev
 |---|---|---|
 | GET | `/` | Basic service metadata |
 | GET | `/api/v1/health` | Health check endpoint |
+| POST | `/api/v1/auth/register` | Register a user under an organization |
+| POST | `/api/v1/auth/token` | Authenticate and return a bearer token |
+| GET | `/api/v1/auth/me` | Return the current authenticated user |
 | POST | `/api/v1/reports` | Create a report record |
 | GET | `/api/v1/reports` | List reports with filters and pagination |
 | GET | `/api/v1/reports/{id}` | Get a report by ID |
@@ -196,11 +221,14 @@ make dev
 .
 ├── app/
 │   ├── api/
+│   │   ├── auth.py
+│   │   ├── dependencies.py
 │   │   ├── documents.py
 │   │   ├── reports.py
 │   │   └── routes.py
 │   ├── core/
-│   │   └── config.py
+│   │   ├── config.py
+│   │   └── security.py
 │   ├── db/
 │   │   └── session.py
 │   ├── models/
@@ -210,6 +238,7 @@ make dev
 │   │   ├── document.py
 │   │   └── tag.py
 │   ├── schemas/
+│   │   ├── auth.py
 │   │   ├── common.py
 │   │   ├── document.py
 │   │   ├── health.py
