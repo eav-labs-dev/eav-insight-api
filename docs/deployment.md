@@ -40,3 +40,10 @@ PASSWORD_HASH_ITERATIONS
 ```
 
 Use a long random `JWT_SECRET_KEY`. Do not reuse the local development value from `.env.example`.
+
+
+## Authorization Behavior
+
+Protected report and document routes require JWT bearer authentication. Production deployments must keep `JWT_SECRET_KEY` private and rotate it if it is exposed.
+
+Organization scoping is enforced at the API layer using the current user from the bearer token. Deployment smoke tests should include an authenticated request to `/api/v1/reports`.

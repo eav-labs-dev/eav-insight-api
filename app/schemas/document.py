@@ -8,7 +8,6 @@ from app.schemas.common import PaginationMeta
 class DocumentCreate(BaseModel):
     """Payload for registering a document record."""
 
-    organization_id: str
     report_id: str | None = None
     filename: str = Field(min_length=1, max_length=255)
     content_type: str = Field(min_length=3, max_length=120)

@@ -1,11 +1,14 @@
+"""Document routes scoped to the authenticated user's organization."""
+
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
+from app.api.dependencies import CurrentUser
 from app.db.session import get_db
-from app.models import Document, Organization, Report
+from app.models import Document, Report
 from app.schemas.common import PaginationMeta
 from app.schemas.document import (
     DocumentCreate,
@@ -19,24 +22,19 @@ router = APIRouter(prefix="/documents", tags=["documents"])
 DbSession = Annotated[Session, Depends(get_db)]
 
 
-def _get_document_or_404(db: Session, document_id: str) -> Document:
-    document = db.get(Document, document_id)
+def _get_document_or_404(db: Session, document_id: str, organization_id: str) -> Document:
+    document = db.scalar(
+        select(Document).where(
+            Document.id == document_id,
+            Document.organization_id == organization_id,
+        )
+    )
     if document is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Document not found.",
         )
     return document
-
-
-def _ensure_organization_exists(db: Session, organization_id: str) -> Organization:
-    organization = db.get(Organization, organization_id)
-    if organization is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Organization not found.",
-        )
-    return organization
 
 
 def _ensure_report_belongs_to_organization(
@@ -47,27 +45,34 @@ def _ensure_report_belongs_to_organization(
     if report_id is None:
         return
 
-    report = db.get(Report, report_id)
+    report = db.scalar(
+        select(Report).where(
+            Report.id == report_id,
+            Report.organization_id == organization_id,
+        )
+    )
     if report is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Report not found.",
         )
-    if report.organization_id != organization_id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Report does not belong to the selected organization.",
-        )
 
 
 @router.post("", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED)
-def create_document(payload: DocumentCreate, db: DbSession) -> Document:
-    """Register a document record."""
-    _ensure_organization_exists(db, payload.organization_id)
-    _ensure_report_belongs_to_organization(db, payload.report_id, payload.organization_id)
+def create_document(
+    payload: DocumentCreate,
+    db: DbSession,
+    current_user: CurrentUser,
+) -> Document:
+    """Register a document under the authenticated user's organization."""
+    _ensure_report_belongs_to_organization(
+        db,
+        payload.report_id,
+        current_user.organization_id,
+    )
 
     document = Document(
-        organization_id=payload.organization_id,
+        organization_id=current_user.organization_id,
         report_id=payload.report_id,
         filename=payload.filename,
         content_type=payload.content_type,
@@ -84,18 +89,16 @@ def create_document(payload: DocumentCreate, db: DbSession) -> Document:
 @router.get("", response_model=DocumentListResponse)
 def list_documents(
     db: DbSession,
-    organization_id: Annotated[str | None, Query()] = None,
+    current_user: CurrentUser,
     report_id: Annotated[str | None, Query()] = None,
     content_type: Annotated[str | None, Query()] = None,
     search: Annotated[str | None, Query(min_length=2)] = None,
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> DocumentListResponse:
-    """List documents with basic filtering, search, and pagination."""
-    filters = []
+    """List documents for the authenticated user's organization."""
+    filters = [Document.organization_id == current_user.organization_id]
 
-    if organization_id is not None:
-        filters.append(Document.organization_id == organization_id)
     if report_id is not None:
         filters.append(Document.report_id == report_id)
     if content_type is not None:
@@ -126,22 +129,27 @@ def list_documents(
 
 
 @router.get("/{document_id}", response_model=DocumentResponse)
-def get_document(document_id: str, db: DbSession) -> Document:
-    """Return a single document by ID."""
-    return _get_document_or_404(db, document_id)
+def get_document(document_id: str, db: DbSession, current_user: CurrentUser) -> Document:
+    """Return a single document visible to the authenticated user."""
+    return _get_document_or_404(db, document_id, current_user.organization_id)
 
 
 @router.patch("/{document_id}", response_model=DocumentResponse)
-def update_document(document_id: str, payload: DocumentUpdate, db: DbSession) -> Document:
-    """Update a document record."""
-    document = _get_document_or_404(db, document_id)
+def update_document(
+    document_id: str,
+    payload: DocumentUpdate,
+    db: DbSession,
+    current_user: CurrentUser,
+) -> Document:
+    """Update a document visible to the authenticated user."""
+    document = _get_document_or_404(db, document_id, current_user.organization_id)
     update_data = payload.model_dump(exclude_unset=True)
 
     if "report_id" in update_data:
         _ensure_report_belongs_to_organization(
             db,
             update_data["report_id"],
-            document.organization_id,
+            current_user.organization_id,
         )
 
     for field, value in update_data.items():
@@ -154,8 +162,8 @@ def update_document(document_id: str, payload: DocumentUpdate, db: DbSession) ->
 
 
 @router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_document(document_id: str, db: DbSession) -> None:
-    """Delete a document record."""
-    document = _get_document_or_404(db, document_id)
+def delete_document(document_id: str, db: DbSession, current_user: CurrentUser) -> None:
+    """Delete a document visible to the authenticated user."""
+    document = _get_document_or_404(db, document_id, current_user.organization_id)
     db.delete(document)
     db.commit()

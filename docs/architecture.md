@@ -39,8 +39,8 @@ Redis planned for background processing workflows
 - auth registration, token, and current-user routes
 - bearer-token current-user dependency
 - password hashing and JWT helpers
-- report CRUD routes
-- document CRUD routes
+- organization-scoped report CRUD routes
+- organization-scoped document CRUD routes
 - request/response schemas
 - database session dependency
 - SQLAlchemy models and relationships
@@ -52,7 +52,7 @@ Redis planned for background processing workflows
 - service layer extraction if route complexity grows
 - tag management endpoints
 - organization and user endpoints
-- organization-scoped authorization checks
+- role-aware authorization helpers
 - background processing placeholder using Redis
 - file upload/storage integration
 
@@ -65,8 +65,21 @@ The current authentication layer is intentionally small but functional:
 - login returns a signed JWT bearer token
 - `/auth/me` validates the token and returns the current user
 
-Authorization is not fully enforced across business endpoints yet. The next step is to protect write operations and scope all report/document access by organization.
+Report and document access is now protected by bearer authentication and scoped by the current user's organization. Cross-organization access returns `404` so callers cannot enumerate records outside their workspace.
 
 ## Engineering Notes
 
 This repository should stay intentionally simple while the MVP is built. Prefer readable structure, documented commands, and real working endpoints over premature abstraction.
+
+
+## Authorization Design
+
+The first authorization layer is organization scoping:
+
+- report and document endpoints require a valid bearer token
+- create operations assign `organization_id` from the current user
+- list operations filter by the current user's organization
+- detail, update, and delete operations only resolve records in the current user's organization
+- cross-organization report/document links are rejected
+
+Role-aware authorization can be added after the MVP routes stabilize.

@@ -21,7 +21,6 @@ class TagSummary(BaseModel):
 class ReportCreate(BaseModel):
     """Payload for creating an operational report."""
 
-    organization_id: str
     title: str = Field(min_length=3, max_length=200)
     summary: str | None = None
     status: ReportStatus = "draft"

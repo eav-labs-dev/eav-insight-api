@@ -14,6 +14,23 @@ http://localhost:8000
 /api/v1
 ```
 
+## Authentication Model
+
+Public endpoints:
+
+- `GET /`
+- `GET /api/v1/health`
+- `POST /api/v1/auth/register`
+- `POST /api/v1/auth/token`
+
+Protected business endpoints require:
+
+```text
+Authorization: Bearer <access_token>
+```
+
+Reports and documents are scoped to the authenticated user's organization. Clients do not send `organization_id` when creating report or document records. The API derives the organization from the current user and returns `404` when a record is outside that organization.
+
 ## Current Endpoints
 
 ### GET `/`
@@ -33,7 +50,6 @@ Example response:
   "environment": "development"
 }
 ```
-
 
 ## Authentication
 
@@ -102,15 +118,16 @@ Authorization: Bearer <access_token>
 
 ## Reports
 
+All report routes require a bearer token.
+
 ### POST `/api/v1/reports`
 
-Creates a report record for an existing organization.
+Creates a report record under the authenticated user's organization.
 
 Example request:
 
 ```json
 {
-  "organization_id": "organization-uuid",
   "title": "Daily Field Operations",
   "summary": "Field report for inspection activity.",
   "status": "submitted",
@@ -121,13 +138,12 @@ Example request:
 
 ### GET `/api/v1/reports`
 
-Lists reports with pagination and optional filters.
+Lists reports in the authenticated user's organization with pagination and optional filters.
 
 Supported query parameters:
 
 | Parameter | Purpose |
 |---|---|
-| `organization_id` | Filter by organization |
 | `status` | Filter by report status |
 | `search` | Search title, summary, and source |
 | `limit` | Page size, from 1 to 100 |
@@ -136,12 +152,12 @@ Supported query parameters:
 Example:
 
 ```text
-/api/v1/reports?organization_id=organization-uuid&search=field&limit=20&offset=0
+/api/v1/reports?search=field&limit=20&offset=0
 ```
 
 ### GET `/api/v1/reports/{report_id}`
 
-Returns one report by ID.
+Returns one organization-visible report by ID.
 
 ### PATCH `/api/v1/reports/{report_id}`
 
@@ -149,19 +165,20 @@ Updates report fields such as title, summary, status, source, reported date, or 
 
 ### DELETE `/api/v1/reports/{report_id}`
 
-Deletes a report record.
+Deletes a report record visible to the authenticated user.
 
 ## Documents
 
+All document routes require a bearer token.
+
 ### POST `/api/v1/documents`
 
-Registers a document record. File upload/storage is intentionally not implemented yet; this endpoint stores document metadata and storage reference paths.
+Registers a document record under the authenticated user's organization. File upload/storage is intentionally not implemented yet; this endpoint stores document metadata and storage reference paths.
 
 Example request:
 
 ```json
 {
-  "organization_id": "organization-uuid",
   "report_id": "report-uuid",
   "filename": "safety-inspection.pdf",
   "content_type": "application/pdf",
@@ -172,13 +189,12 @@ Example request:
 
 ### GET `/api/v1/documents`
 
-Lists documents with pagination and optional filters.
+Lists documents in the authenticated user's organization with pagination and optional filters.
 
 Supported query parameters:
 
 | Parameter | Purpose |
 |---|---|
-| `organization_id` | Filter by organization |
 | `report_id` | Filter by linked report |
 | `content_type` | Filter by MIME/content type |
 | `search` | Search filename and storage path |
@@ -187,7 +203,7 @@ Supported query parameters:
 
 ### GET `/api/v1/documents/{document_id}`
 
-Returns one document by ID.
+Returns one organization-visible document by ID.
 
 ### PATCH `/api/v1/documents/{document_id}`
 
@@ -195,7 +211,7 @@ Updates document metadata.
 
 ### DELETE `/api/v1/documents/{document_id}`
 
-Deletes a document record.
+Deletes a document record visible to the authenticated user.
 
 ## OpenAPI Docs
 
@@ -225,9 +241,9 @@ See [`database.md`](database.md) for table and migration notes.
 
 ## Planned API Areas
 
-- organization-scoped authorization
 - organizations
 - users
 - tags
+- role-aware authorization helpers
 - file upload/storage integration
 - background processing placeholder
