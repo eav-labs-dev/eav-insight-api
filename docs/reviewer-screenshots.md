@@ -31,8 +31,6 @@ Expected response:
 }
 ```
 
-Suggested filename:
-
 ```text
 docs/assets/screenshots/live-root-endpoint.png
 ```
@@ -44,8 +42,6 @@ URL:
 ```text
 https://eav-insight-api.onrender.com/api/v1/health
 ```
-
-Suggested filename:
 
 ```text
 docs/assets/screenshots/live-health-endpoint.png
@@ -59,8 +55,6 @@ URL:
 https://eav-insight-api.onrender.com/docs
 ```
 
-Suggested filename:
-
 ```text
 docs/assets/screenshots/swagger-overview.png
 ```
@@ -72,8 +66,6 @@ Capture:
 - `/api/v1/auth/register`
 - `/api/v1/auth/token`
 - `/api/v1/auth/me`
-
-Suggested filename:
 
 ```text
 docs/assets/screenshots/swagger-auth-endpoints.png
@@ -87,8 +79,6 @@ Capture:
 - document endpoints
 - search/filter/pagination parameters
 
-Suggested filename:
-
 ```text
 docs/assets/screenshots/swagger-business-endpoints.png
 ```
@@ -97,8 +87,6 @@ docs/assets/screenshots/swagger-business-endpoints.png
 
 Capture a passing CI workflow run.
 
-Suggested filename:
-
 ```text
 docs/assets/screenshots/github-actions-ci.png
 ```
@@ -106,8 +94,6 @@ docs/assets/screenshots/github-actions-ci.png
 ### 7. Render Deployment Success
 
 Capture the Render service dashboard showing a successful deploy.
-
-Suggested filename:
 
 ```text
 docs/assets/screenshots/render-deployment-success.png
@@ -132,3 +118,50 @@ Add this after the Live Demo section when screenshots exist:
 
 ![GitHub Actions CI](docs/assets/screenshots/github-actions-ci.png)
 ```
+
+## Captured Screenshots
+
+The repository now includes the reviewer screenshots below. These images give reviewers visual proof that the API is live, documented, deployed, and checked by CI.
+
+| Screenshot         | Purpose                                                | File                                                               |
+| ------------------ | ------------------------------------------------------ | ------------------------------------------------------------------ |
+| Swagger docs home  | Shows live OpenAPI documentation and grouped endpoints | `docs/assets/screenshots/swagger-docs.png`                         |
+| GitHub Actions CI  | Shows passing CI workflow runs                         | `docs/assets/screenshots/github-actions-ci.png`                    |
+| Live health check  | Shows production health endpoint response              | `docs/assets/screenshots/live-health-check.png`                    |
+| Render deployment  | Shows live Render deployment and health-check logs     | `docs/assets/screenshots/render-deployment.png`                    |
+| Live root endpoint | Shows public root endpoint metadata                    | `docs/assets/screenshots/live-root-endpoint.png`                   |
+| Business endpoints | Shows protected report/document API endpoints          | `docs/assets/screenshots/swagger-business-endpoints.png`           |
+| Error responses    | Shows documented validation/error behavior             | `docs/assets/screenshots/swagger-business-endpoints-errors.png`    |
+| Response examples  | Shows documented successful response schema            | `docs/assets/screenshots/swagger-business-endpoints-responses.png` |
+
+### Swagger Docs Home
+
+![Swagger docs home](assets/screenshots/swagger-docs.png)
+
+### Live Root Endpoint
+
+![Live root endpoint](assets/screenshots/live-root-endpoint.png)
+
+### Live Health Check
+
+![Live health check](assets/screenshots/live-health-check.png)
+
+### GitHub Actions CI
+
+![GitHub Actions CI](assets/screenshots/github-actions-ci.png)
+
+### Render Deployment
+
+![Render deployment](assets/screenshots/render-deployment.png)
+
+### Business Endpoints
+
+![Swagger business endpoints](assets/screenshots/swagger-business-endpoints.png)
+
+### Error Responses
+
+![Swagger business endpoint errors](assets/screenshots/swagger-business-endpoints-errors.png)
+
+### Response Examples
+
+![Swagger business endpoint responses](assets/screenshots/swagger-business-endpoints-responses.png)

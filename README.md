@@ -1,5 +1,7 @@
 # EAV Insight API
 
+[![CI](https://github.com/eav-labs-dev/eav-insight-api/actions/workflows/ci.yml/badge.svg)](https://github.com/eav-labs-dev/eav-insight-api/actions/workflows/ci.yml)
+
 FastAPI backend for document intake, operational reporting, and searchable business records.
 
 ## Project Status
@@ -15,6 +17,16 @@ The API is deployed on Render:
 - OpenAPI docs: `https://eav-insight-api.onrender.com/docs`
 
 This deployment is intended as a portfolio demo environment for reviewing the API structure, documentation, and backend workflow.
+
+<!-- EAV_SCREENSHOTS_START -->
+## Screenshots
+
+### OpenAPI Documentation
+
+![EAV Insight API Swagger documentation](docs/assets/screenshots/swagger-docs.png)
+
+The live Swagger/OpenAPI interface shows the health, authentication, report, and document API groups.
+<!-- EAV_SCREENSHOTS_END -->
 
 ## What This Project Demonstrates
 
