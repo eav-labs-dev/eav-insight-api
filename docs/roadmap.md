@@ -24,13 +24,13 @@
 
 ## Phase 3 — API MVP
 
-- [ ] add report CRUD endpoints
-- [ ] add document CRUD endpoints
+- [x] add report CRUD endpoints
+- [x] add document CRUD endpoints
 - [ ] add tag support
-- [ ] add search and filtering
-- [ ] add pagination
+- [x] add search and filtering
+- [x] add pagination
 - [ ] add basic auth foundation
-- [ ] document API examples
+- [x] document API examples
 
 ## Phase 4 — Portfolio Polish
 

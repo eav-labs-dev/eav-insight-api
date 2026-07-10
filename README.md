@@ -21,6 +21,9 @@ Current foundation:
 - SQLAlchemy database models
 - Alembic migration setup
 - Demo seed data script
+- Report CRUD endpoints
+- Document CRUD endpoints
+- Basic search, filtering, and pagination
 - Dockerfile
 - Docker Compose with PostgreSQL and Redis
 - Pytest test suite
@@ -31,14 +34,11 @@ Current foundation:
 Planned MVP features:
 
 - user authentication
-- organization support
-- report/document records
-- tags/categories
-- search and filtering
-- pagination
+- organization and user API endpoints
+- tag management endpoints
 - background processing placeholder
-- OpenAPI documentation
-- seed/demo data
+- richer OpenAPI examples
+- deployment-ready production settings
 
 ## Tech Stack
 
@@ -179,6 +179,16 @@ make dev
 |---|---|---|
 | GET | `/` | Basic service metadata |
 | GET | `/api/v1/health` | Health check endpoint |
+| POST | `/api/v1/reports` | Create a report record |
+| GET | `/api/v1/reports` | List reports with filters and pagination |
+| GET | `/api/v1/reports/{id}` | Get a report by ID |
+| PATCH | `/api/v1/reports/{id}` | Update a report |
+| DELETE | `/api/v1/reports/{id}` | Delete a report |
+| POST | `/api/v1/documents` | Register a document record |
+| GET | `/api/v1/documents` | List documents with filters and pagination |
+| GET | `/api/v1/documents/{id}` | Get a document by ID |
+| PATCH | `/api/v1/documents/{id}` | Update a document |
+| DELETE | `/api/v1/documents/{id}` | Delete a document |
 
 ## Project Structure
 
@@ -186,6 +196,8 @@ make dev
 .
 ├── app/
 │   ├── api/
+│   │   ├── documents.py
+│   │   ├── reports.py
 │   │   └── routes.py
 │   ├── core/
 │   │   └── config.py
@@ -198,7 +210,10 @@ make dev
 │   │   ├── document.py
 │   │   └── tag.py
 │   ├── schemas/
-│   │   └── health.py
+│   │   ├── common.py
+│   │   ├── document.py
+│   │   ├── health.py
+│   │   └── report.py
 │   └── main.py
 ├── alembic/
 ├── docs/
