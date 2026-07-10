@@ -45,7 +45,8 @@ Redis planned for background processing workflows
 - database session dependency
 - SQLAlchemy models and relationships
 - search/filtering queries
-- limit/offset pagination responses
+- deterministic sorting controls
+- enriched limit/offset pagination responses
 
 ## Planned MVP Components
 
@@ -66,6 +67,20 @@ The current authentication layer is intentionally small but functional:
 - `/auth/me` validates the token and returns the current user
 
 Report and document access is now protected by bearer authentication and scoped by the current user's organization. Cross-organization access returns `404` so callers cannot enumerate records outside their workspace.
+
+## Search and Pagination Design
+
+List routes keep query logic close to the API layer for now because the MVP is
+still small. The current implementation supports common operational workflows:
+
+- text search over report and document metadata
+- exact filters for workflow status, source, content type, and linked records
+- date and size range filters where they matter
+- deterministic sorting for stable API results
+- pagination metadata that supports frontend and mobile list views
+
+A service/repository layer can be extracted later if filtering rules become more
+complex.
 
 ## Engineering Notes
 

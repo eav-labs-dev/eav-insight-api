@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Advanced report filters for source, tag, reported date range, sorting, and pagination metadata.
+- Advanced document filters for report, content type, file size range, sorting, and pagination metadata.
+- API tests covering report/document search, filtering, sorting, and paginated responses.
+- README, API, architecture, and roadmap documentation updates for search/filter pagination behavior.
 - Organization-scoped authorization for report and document endpoints.
 - Bearer-token protection for report and document create/list/detail/update/delete routes.
 - Access-control tests for unauthenticated and cross-organization report/document access.

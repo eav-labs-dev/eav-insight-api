@@ -28,7 +28,8 @@
 - [x] add document CRUD endpoints
 - [ ] add tag management endpoints
 - [x] add search and filtering
-- [x] add pagination
+- [x] add sorting controls
+- [x] add enriched pagination metadata
 - [x] add basic auth foundation
 - [x] document API examples
 
