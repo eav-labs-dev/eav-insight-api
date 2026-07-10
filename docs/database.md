@@ -84,3 +84,10 @@ make seed
 The `users` table now includes `password_hash` for storing salted password hashes. Plaintext passwords must never be committed, logged, stored, or returned from API responses.
 
 The demo seed user uses a local-only password documented in the seed script and should not be treated as a production credential.
+
+
+## Organization Scoping
+
+Reports, documents, users, and tags are scoped to organizations. Business API routes derive the active `organization_id` from the authenticated user instead of trusting client-provided organization identifiers.
+
+This supports realistic multi-tenant behavior and prevents a user from reading or mutating records from another organization.

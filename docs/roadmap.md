@@ -34,8 +34,8 @@
 
 ## Phase 4 — Authorization and Organization Workflows
 
-- [ ] protect write endpoints with authenticated users
-- [ ] add organization-scoped access checks
+- [x] protect write endpoints with authenticated users
+- [x] add organization-scoped access checks
 - [ ] add organization API endpoints
 - [ ] add user management endpoints
 - [ ] add tag management endpoints

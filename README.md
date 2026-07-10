@@ -24,6 +24,7 @@ Current foundation:
 - Report CRUD endpoints
 - Document CRUD endpoints
 - User registration and JWT authentication foundation
+- Organization-scoped report and document access
 - Basic search, filtering, and pagination
 - Dockerfile
 - Docker Compose with PostgreSQL and Redis
@@ -34,7 +35,6 @@ Current foundation:
 
 Planned MVP features:
 
-- organization-scoped authorization
 - organization and user API endpoints
 - tag management endpoints
 - background processing placeholder
@@ -137,7 +137,13 @@ POST /api/v1/auth/token
 GET  /api/v1/auth/me
 ```
 
-The report and document endpoints are not fully organization-authorized yet. That is the next backend security step.
+Use the returned token for business endpoints:
+
+```bash
+curl -H "Authorization: Bearer <access_token>" http://localhost:8000/api/v1/reports
+```
+
+Report and document endpoints now require bearer authentication. Records are automatically scoped to the authenticated user's organization, so clients do not send `organization_id` when creating reports or documents.
 
 ## Database Commands
 
@@ -204,13 +210,13 @@ make dev
 | POST | `/api/v1/auth/register` | Register a user under an organization |
 | POST | `/api/v1/auth/token` | Authenticate and return a bearer token |
 | GET | `/api/v1/auth/me` | Return the current authenticated user |
-| POST | `/api/v1/reports` | Create a report record |
-| GET | `/api/v1/reports` | List reports with filters and pagination |
+| POST | `/api/v1/reports` | Create an authenticated organization-scoped report record |
+| GET | `/api/v1/reports` | List authenticated organization-scoped reports with filters and pagination |
 | GET | `/api/v1/reports/{id}` | Get a report by ID |
 | PATCH | `/api/v1/reports/{id}` | Update a report |
 | DELETE | `/api/v1/reports/{id}` | Delete a report |
-| POST | `/api/v1/documents` | Register a document record |
-| GET | `/api/v1/documents` | List documents with filters and pagination |
+| POST | `/api/v1/documents` | Register an authenticated organization-scoped document record |
+| GET | `/api/v1/documents` | List authenticated organization-scoped documents with filters and pagination |
 | GET | `/api/v1/documents/{id}` | Get a document by ID |
 | PATCH | `/api/v1/documents/{id}` | Update a document |
 | DELETE | `/api/v1/documents/{id}` | Delete a document |

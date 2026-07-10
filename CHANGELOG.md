@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Organization-scoped authorization for report and document endpoints.
+- Bearer-token protection for report and document create/list/detail/update/delete routes.
+- Access-control tests for unauthenticated and cross-organization report/document access.
+- README, API, architecture, database, deployment, and roadmap documentation updates for secured business endpoints.
 - Authentication foundation with user registration, JWT token issuance, and current-user endpoint.
 - Password hashing helpers using salted PBKDF2-SHA256.
 - Auth schemas, route dependencies, and bearer-token validation.

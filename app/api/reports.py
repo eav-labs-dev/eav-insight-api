@@ -1,11 +1,14 @@
+"""Report routes scoped to the authenticated user's organization."""
+
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
+from app.api.dependencies import CurrentUser
 from app.db.session import get_db
-from app.models import Organization, Report, Tag
+from app.models import Report, Tag
 from app.schemas.common import PaginationMeta
 from app.schemas.report import ReportCreate, ReportListResponse, ReportResponse, ReportUpdate
 
@@ -14,11 +17,14 @@ router = APIRouter(prefix="/reports", tags=["reports"])
 DbSession = Annotated[Session, Depends(get_db)]
 
 
-def _get_report_or_404(db: Session, report_id: str) -> Report:
+def _get_report_or_404(db: Session, report_id: str, organization_id: str) -> Report:
     report = db.scalar(
         select(Report)
         .options(selectinload(Report.tags))
-        .where(Report.id == report_id)
+        .where(
+            Report.id == report_id,
+            Report.organization_id == organization_id,
+        )
     )
     if report is None:
         raise HTTPException(
@@ -26,16 +32,6 @@ def _get_report_or_404(db: Session, report_id: str) -> Report:
             detail="Report not found.",
         )
     return report
-
-
-def _ensure_organization_exists(db: Session, organization_id: str) -> Organization:
-    organization = db.get(Organization, organization_id)
-    if organization is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Organization not found.",
-        )
-    return organization
 
 
 def _load_tags(db: Session, organization_id: str, tag_ids: list[str]) -> list[Tag]:
@@ -59,13 +55,16 @@ def _load_tags(db: Session, organization_id: str, tag_ids: list[str]) -> list[Ta
 
 
 @router.post("", response_model=ReportResponse, status_code=status.HTTP_201_CREATED)
-def create_report(payload: ReportCreate, db: DbSession) -> Report:
-    """Create a report record for an organization."""
-    _ensure_organization_exists(db, payload.organization_id)
-    tags = _load_tags(db, payload.organization_id, payload.tag_ids)
+def create_report(
+    payload: ReportCreate,
+    db: DbSession,
+    current_user: CurrentUser,
+) -> Report:
+    """Create a report record under the authenticated user's organization."""
+    tags = _load_tags(db, current_user.organization_id, payload.tag_ids)
 
     report = Report(
-        organization_id=payload.organization_id,
+        organization_id=current_user.organization_id,
         title=payload.title,
         summary=payload.summary,
         status=payload.status,
@@ -77,23 +76,21 @@ def create_report(payload: ReportCreate, db: DbSession) -> Report:
     db.add(report)
     db.commit()
     db.refresh(report)
-    return _get_report_or_404(db, report.id)
+    return _get_report_or_404(db, report.id, current_user.organization_id)
 
 
 @router.get("", response_model=ReportListResponse)
 def list_reports(
     db: DbSession,
-    organization_id: Annotated[str | None, Query()] = None,
+    current_user: CurrentUser,
     status_filter: Annotated[str | None, Query(alias="status")] = None,
     search: Annotated[str | None, Query(min_length=2)] = None,
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> ReportListResponse:
-    """List reports with basic filtering, search, and pagination."""
-    filters = []
+    """List reports for the authenticated user's organization."""
+    filters = [Report.organization_id == current_user.organization_id]
 
-    if organization_id is not None:
-        filters.append(Report.organization_id == organization_id)
     if status_filter is not None:
         filters.append(Report.status == status_filter)
     if search is not None:
@@ -124,20 +121,25 @@ def list_reports(
 
 
 @router.get("/{report_id}", response_model=ReportResponse)
-def get_report(report_id: str, db: DbSession) -> Report:
-    """Return a single report by ID."""
-    return _get_report_or_404(db, report_id)
+def get_report(report_id: str, db: DbSession, current_user: CurrentUser) -> Report:
+    """Return a single report visible to the authenticated user."""
+    return _get_report_or_404(db, report_id, current_user.organization_id)
 
 
 @router.patch("/{report_id}", response_model=ReportResponse)
-def update_report(report_id: str, payload: ReportUpdate, db: DbSession) -> Report:
-    """Update a report record."""
-    report = _get_report_or_404(db, report_id)
+def update_report(
+    report_id: str,
+    payload: ReportUpdate,
+    db: DbSession,
+    current_user: CurrentUser,
+) -> Report:
+    """Update a report record visible to the authenticated user."""
+    report = _get_report_or_404(db, report_id, current_user.organization_id)
     update_data = payload.model_dump(exclude_unset=True)
 
     tag_ids = update_data.pop("tag_ids", None)
     if tag_ids is not None:
-        report.tags = _load_tags(db, report.organization_id, tag_ids)
+        report.tags = _load_tags(db, current_user.organization_id, tag_ids)
 
     for field, value in update_data.items():
         setattr(report, field, value)
@@ -145,12 +147,12 @@ def update_report(report_id: str, payload: ReportUpdate, db: DbSession) -> Repor
     db.add(report)
     db.commit()
     db.refresh(report)
-    return _get_report_or_404(db, report.id)
+    return _get_report_or_404(db, report.id, current_user.organization_id)
 
 
 @router.delete("/{report_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_report(report_id: str, db: DbSession) -> None:
-    """Delete a report record."""
-    report = _get_report_or_404(db, report_id)
+def delete_report(report_id: str, db: DbSession, current_user: CurrentUser) -> None:
+    """Delete a report visible to the authenticated user."""
+    report = _get_report_or_404(db, report_id, current_user.organization_id)
     db.delete(report)
     db.commit()
