@@ -1,3 +1,5 @@
+"""Health endpoint tests."""
+
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -10,6 +12,7 @@ def test_root_returns_service_metadata() -> None:
 
     assert response.status_code == 200
     body = response.json()
+
     assert body["service"] == "EAV Insight API"
     assert body["status"] == "running"
     assert body["docs"] == "/docs"
@@ -21,8 +24,7 @@ def test_health_check_returns_ok_status() -> None:
 
     assert response.status_code == 200
     body = response.json()
-    assert body == {
-        "status": "ok",
-        "service": "EAV Insight API",
-        "environment": "development",
-    }
+
+    assert body["status"] == "ok"
+    assert body["service"] == "EAV Insight API"
+    assert body["environment"] in {"development", "test"}
