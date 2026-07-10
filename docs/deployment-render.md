@@ -83,13 +83,13 @@ Replace the Render URL with the actual service URL after creation if Render assi
 
 Most values are declared in `render.yaml`. These values matter most:
 
-| Variable | Source | Notes |
-|---|---|---|
-| `DATABASE_URL` | Render Postgres | Referenced from `eav-insight-db` |
-| `JWT_SECRET_KEY` | Render generated value | Do not commit a real secret |
-| `CORS_ORIGINS` | Render dashboard prompt | Set explicitly for the deployed API/frontends |
-| `ENVIRONMENT` | Blueprint | Set to `production` |
-| `DEBUG` | Blueprint | Set to `false` |
+| Variable         | Source                  | Notes                                         |
+| ---------------- | ----------------------- | --------------------------------------------- |
+| `DATABASE_URL`   | Render Postgres         | Referenced from `eav-insight-db`              |
+| `JWT_SECRET_KEY` | Render generated value  | Do not commit a real secret                   |
+| `CORS_ORIGINS`   | Render dashboard prompt | Set explicitly for the deployed API/frontends |
+| `ENVIRONMENT`    | Blueprint               | Set to `production`                           |
+| `DEBUG`          | Blueprint               | Set to `false`                                |
 
 ## Database URL compatibility
 
@@ -172,3 +172,11 @@ If this deployment becomes public for longer-term use, change or remove demo cre
 Render free-tier web services do not support pre-deploy commands. For this deployment, the Dockerfile starts `scripts/start_production.sh`, which runs Alembic migrations and then starts Uvicorn.
 
 This keeps the free-tier deployment simple while still applying migrations before the API starts.
+
+## Live Deployment
+
+The current portfolio demo deployment is available at:
+
+```text
+https://eav-insight-api.onrender.com
+```
