@@ -1,4 +1,4 @@
-.PHONY: install dev test lint format check ci docker-build docker-up docker-down docker-logs docker-shell docker-migrate docker-seed db-upgrade db-downgrade db-revision migration-check seed clean
+.PHONY: install dev test lint format check ci docker-build docker-up docker-down docker-logs docker-shell docker-migrate docker-seed db-upgrade db-downgrade db-revision migration-check seed demo-api clean
 
 install:
 	python -m pip install --upgrade pip
@@ -55,6 +55,9 @@ migration-check:
 
 seed:
 	python scripts/seed_demo_data.py
+
+demo-api:
+	./scripts/demo_api_flow.sh
 
 clean:
 	rm -rf .pytest_cache .ruff_cache htmlcov .coverage

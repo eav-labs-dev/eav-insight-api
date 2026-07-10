@@ -34,6 +34,7 @@
 - [x] add consistent API error responses
 - [x] add basic auth foundation
 - [x] document API examples
+- [x] add runnable demo request workflow
 
 ## Phase 4 — Authorization and Organization Workflows
 
@@ -49,6 +50,7 @@
 - [ ] add CI badge after repository path is finalized
 - [ ] add architecture diagram
 - [ ] add screenshots or Swagger screenshots
+- [x] add reviewer-friendly API examples
 - [x] add deployment notes
 - [ ] create LinkedIn launch summary
 

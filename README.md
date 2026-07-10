@@ -149,6 +149,32 @@ docker compose down -v
 
 More details are available in [`docs/development.md`](docs/development.md).
 
+## Quick Demo Workflow
+
+After the API, PostgreSQL, and Redis are running, apply migrations and seed the demo workspace:
+
+```bash
+docker compose exec api alembic upgrade head
+docker compose exec api python scripts/seed_demo_data.py
+```
+
+The seed script creates a demo organization, admin user, report, tags, and document metadata. Demo credentials:
+
+```text
+Email: admin@example.com
+Password: ChangeMe123!
+```
+
+Run the demo API flow from your host machine:
+
+```bash
+make demo-api
+```
+
+The demo flow logs in, reads the current user, creates a report, lists filtered reports, registers document metadata, lists documents, and shows a validation-error example. It is intentionally written with `curl` and Python standard-library JSON parsing so reviewers can run it without installing extra CLI tools like `jq`.
+
+Full request examples are documented in [`docs/api-examples.md`](docs/api-examples.md).
+
 ## Authentication Configuration
 
 Local authentication uses JWT bearer tokens and salted password hashes. Create a real secret in `.env` before running anything outside local development:
