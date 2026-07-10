@@ -3,6 +3,8 @@
 ```md id="rbehbg"
 ### Added
 
+- Added CI badge and reviewer screenshots for the live API, Swagger docs, Render deployment, and GitHub Actions.
+
 - Added live Render deployment URL to README and deployment documentation.
 
 ### Fixed
