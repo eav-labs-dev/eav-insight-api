@@ -20,6 +20,7 @@ Business teams often store reports, documents, invoices, and field records in sc
 
 - organization support
 - report/document records
+- report and document CRUD endpoints
 - tags/categories
 - user authentication
 - search and filtering

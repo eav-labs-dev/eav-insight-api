@@ -34,13 +34,24 @@ Redis planned for background processing workflows
 | `app/schemas/` | request/response models |
 | `tests/` | automated tests |
 
+## Current API Components
+
+- report CRUD routes
+- document CRUD routes
+- request/response schemas
+- database session dependency
+- SQLAlchemy models and relationships
+- search/filtering queries
+- limit/offset pagination responses
+
 ## Planned MVP Components
 
-- CRUD service layer for reports, documents, and tags
+- service layer extraction if route complexity grows
+- tag management endpoints
+- organization and user endpoints
 - authentication and authorization foundation
-- search/filtering service layer
-- pagination utilities
 - background processing placeholder using Redis
+- file upload/storage integration
 
 ## Engineering Notes
 
