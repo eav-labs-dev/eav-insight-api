@@ -52,6 +52,7 @@
 - [ ] add screenshots or Swagger screenshots
 - [x] add reviewer-friendly API examples
 - [x] add deployment notes
+- [x] add Render deployment Blueprint and smoke-check script
 - [ ] create LinkedIn launch summary
 
 ## Phase 6 — Delivery Readiness
@@ -60,5 +61,5 @@
 - [x] add CI migration check
 - [x] add CI Docker image build check
 - [x] document local and Docker development workflows
-- [ ] add deployment target notes once platform is selected
-- [ ] add production CORS/domain configuration notes
+- [x] add deployment target notes once platform is selected
+- [x] add production CORS/domain configuration notes

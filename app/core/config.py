@@ -41,6 +41,23 @@ class Settings(BaseSettings):
         """Return CORS origins as a clean list."""
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
+    @property
+    def sqlalchemy_database_url(self) -> str:
+        """Return a SQLAlchemy-compatible database URL.
+
+        Hosted PostgreSQL providers commonly expose URLs that start with
+        ``postgres://`` or ``postgresql://``. This project installs the modern
+        psycopg driver, so SQLAlchemy should use the explicit
+        ``postgresql+psycopg://`` dialect for hosted PostgreSQL connections.
+        """
+        if self.database_url.startswith("postgres://"):
+            return self.database_url.replace("postgres://", "postgresql+psycopg://", 1)
+
+        if self.database_url.startswith("postgresql://"):
+            return self.database_url.replace("postgresql://", "postgresql+psycopg://", 1)
+
+        return self.database_url
+
 
 @lru_cache
 def get_settings() -> Settings:

@@ -32,6 +32,7 @@ Current foundation:
 - Pytest test suite
 - Ruff linting setup
 - GitHub Actions CI workflow with lint, tests, migration check, and Docker build check
+- Render deployment Blueprint, release script, and deployment smoke-check script
 - Documentation folder
 
 Planned MVP features:
@@ -52,6 +53,7 @@ Planned MVP features:
 - Pytest
 - Ruff
 - GitHub Actions
+- Render deployment target
 
 ## Local Development
 
@@ -274,7 +276,28 @@ make docker-build
 make docker-up
 make docker-migrate
 make docker-seed
+make check-deploy url=https://your-service-name.onrender.com
 ```
+
+## Deployment
+
+The first public deployment target is Render using Docker and Render Postgres. The repository includes a Render Blueprint and release script:
+
+```text
+render.yaml
+scripts/render_release.sh
+scripts/check_deployment.sh
+```
+
+The deployment uses `/api/v1/health` as the platform health check and runs Alembic migrations before the service starts. Render injects `DATABASE_URL` from the managed PostgreSQL database and generates `JWT_SECRET_KEY` through the Blueprint.
+
+After deployment, verify the live API with:
+
+```bash
+make check-deploy url=https://your-service-name.onrender.com
+```
+
+Detailed deployment steps are documented in [`docs/deployment-render.md`](docs/deployment-render.md).
 
 ## API Endpoints
 

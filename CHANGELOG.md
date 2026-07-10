@@ -6,6 +6,12 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Render deployment Blueprint with Docker web service and managed PostgreSQL configuration.
+- Render release script for Alembic migration execution before service startup.
+- Deployment smoke-check script and `make check-deploy` command.
+- Render-specific deployment guide in `docs/deployment-render.md`.
+- Hosted PostgreSQL URL normalization for provider-supplied database connection strings.
+- Configuration tests for SQLAlchemy database URL normalization.
 - Reviewer-friendly API demo request walkthrough in `docs/api-examples.md`.
 - `scripts/demo_api_flow.sh` for a curl-based login, report, document, filtering, and error-response demo.
 - `make demo-api` command for quickly exercising the seeded API workflow.
