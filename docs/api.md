@@ -246,6 +246,55 @@ List endpoints return a consistent pagination object:
 This gives frontend or mobile clients enough metadata to build paginated list
 views without guessing whether another page exists.
 
+
+## Error Response Shape
+
+All handled HTTP and validation errors use a consistent error envelope.
+
+Example not-found response:
+
+```json
+{
+  "error": {
+    "code": "not_found",
+    "message": "Report not found.",
+    "details": []
+  }
+}
+```
+
+Example validation response:
+
+```json
+{
+  "error": {
+    "code": "validation_error",
+    "message": "Request validation failed.",
+    "details": [
+      {
+        "field": "body.title",
+        "message": "String should have at least 2 characters",
+        "type": "string_too_short"
+      }
+    ]
+  }
+}
+```
+
+Current standard codes include:
+
+| Code | Typical status | Meaning |
+|---|---:|---|
+| `bad_request` | 400 | The request is syntactically valid but cannot be accepted |
+| `unauthorized` | 401 | The caller is missing or has supplied invalid credentials |
+| `forbidden` | 403 | The caller is authenticated but not allowed to perform the action |
+| `not_found` | 404 | The resource does not exist or is not visible to the caller |
+| `conflict` | 409 | The request conflicts with an existing resource |
+| `validation_error` | 422 | Request data failed schema validation |
+
+This makes frontend, mobile, and integration clients easier to build because
+they can consistently read `error.code`, `error.message`, and `error.details`.
+
 ## OpenAPI Docs
 
 FastAPI generates Swagger documentation automatically:

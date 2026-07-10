@@ -2,11 +2,12 @@
 
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy import ColumnElement, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import CurrentUser
+from app.core.exceptions import not_found
 from app.db.session import get_db
 from app.models import Document, Report
 from app.schemas.common import PaginationMeta
@@ -32,10 +33,7 @@ def _get_document_or_404(db: Session, document_id: str, organization_id: str) ->
         )
     )
     if document is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Document not found.",
-        )
+        raise not_found("Document not found.")
     return document
 
 
@@ -54,10 +52,7 @@ def _ensure_report_belongs_to_organization(
         )
     )
     if report is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Report not found.",
-        )
+        raise not_found("Report not found.")
 
 
 def _get_document_sort_column(sort_by: DocumentSortBy) -> ColumnElement[object]:

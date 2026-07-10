@@ -13,7 +13,7 @@ FastAPI app
   ↓
 Versioned API routes: /api/v1
   ↓
-Schemas, auth dependencies, and route logic
+Schemas, auth dependencies, route logic, and error handlers
   ↓
 SQLAlchemy models
   ↓
@@ -28,7 +28,7 @@ Redis planned for background processing workflows
 |---|---|
 | `app/main.py` | application factory, middleware, router registration |
 | `app/api/` | API route definitions |
-| `app/core/` | settings, configuration, shared utilities |
+| `app/core/` | settings, configuration, error handling, security utilities |
 | `app/db/` | SQLAlchemy engine, sessions, and database dependencies |
 | `app/models/` | database models and relationships |
 | `app/schemas/` | request/response models |
@@ -47,6 +47,7 @@ Redis planned for background processing workflows
 - search/filtering queries
 - deterministic sorting controls
 - enriched limit/offset pagination responses
+- centralized HTTP and validation error response handling
 
 ## Planned MVP Components
 
@@ -81,6 +82,27 @@ still small. The current implementation supports common operational workflows:
 
 A service/repository layer can be extracted later if filtering rules become more
 complex.
+
+
+## Error Handling Design
+
+The API now uses application-level handlers for HTTP exceptions and request
+validation errors. Handled errors return the same envelope:
+
+```json
+{
+  "error": {
+    "code": "not_found",
+    "message": "Report not found.",
+    "details": []
+  }
+}
+```
+
+Route code raises small helper exceptions from `app/core/exceptions.py`, while
+`app/core/error_handlers.py` renders those exceptions consistently. This keeps
+route logic readable and gives API consumers predictable error handling across
+auth, validation, not-found, conflict, and bad-request cases.
 
 ## Engineering Notes
 

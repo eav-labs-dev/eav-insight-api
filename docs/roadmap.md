@@ -30,6 +30,7 @@
 - [x] add search and filtering
 - [x] add sorting controls
 - [x] add enriched pagination metadata
+- [x] add consistent API error responses
 - [x] add basic auth foundation
 - [x] document API examples
 
@@ -47,5 +48,5 @@
 - [ ] add CI badge
 - [ ] add architecture diagram
 - [ ] add screenshots or Swagger screenshots
-- [ ] add deployment notes
+- [x] add deployment notes
 - [ ] create LinkedIn launch summary

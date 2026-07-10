@@ -26,6 +26,7 @@ Current foundation:
 - User registration and JWT authentication foundation
 - Organization-scoped report and document access
 - Advanced search, filtering, sorting, and pagination metadata
+- Consistent API error response format
 - Dockerfile
 - Docker Compose with PostgreSQL and Redis
 - Pytest test suite
@@ -37,7 +38,6 @@ Planned MVP features:
 
 - organization and user API endpoints
 - tag management endpoints
-- background processing placeholder
 - background processing placeholder
 - file upload/storage integration
 - deployment-ready production settings
@@ -141,7 +141,8 @@ GET  /api/v1/auth/me
 Use the returned token for business endpoints:
 
 ```bash
-curl -H "Authorization: Bearer <access_token>" http://localhost:8000/api/v1/reports
+curl -H "Authorization: Bearer <access_token>" \
+  http://localhost:8000/api/v1/reports
 ```
 
 Report and document endpoints now require bearer authentication. Records are automatically scoped to the authenticated user's organization, so clients do not send `organization_id` when creating reports or documents.
@@ -259,6 +260,40 @@ List responses include pagination metadata with `total`, `count`, `has_next`,
 `has_previous`, `next_offset`, and `previous_offset` so clients can build real
 paginated workflows.
 
+
+## Error Response Format
+
+API errors use a consistent response envelope:
+
+```json
+{
+  "error": {
+    "code": "not_found",
+    "message": "Report not found.",
+    "details": []
+  }
+}
+```
+
+Validation errors include field-level details so API clients can show useful form
+messages:
+
+```json
+{
+  "error": {
+    "code": "validation_error",
+    "message": "Request validation failed.",
+    "details": [
+      {
+        "field": "body.title",
+        "message": "String should have at least 2 characters",
+        "type": "string_too_short"
+      }
+    ]
+  }
+}
+```
+
 ## Project Structure
 
 ```text
@@ -272,6 +307,8 @@ paginated workflows.
 │   │   └── routes.py
 │   ├── core/
 │   │   ├── config.py
+│   │   ├── error_handlers.py
+│   │   ├── exceptions.py
 │   │   └── security.py
 │   ├── db/
 │   │   └── session.py
@@ -285,6 +322,7 @@ paginated workflows.
 │   │   ├── auth.py
 │   │   ├── common.py
 │   │   ├── document.py
+│   │   ├── error.py
 │   │   ├── health.py
 │   │   └── report.py
 │   └── main.py
