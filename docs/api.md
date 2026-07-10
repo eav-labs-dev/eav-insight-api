@@ -144,15 +144,21 @@ Supported query parameters:
 
 | Parameter | Purpose |
 |---|---|
-| `status` | Filter by report status |
 | `search` | Search title, summary, and source |
+| `status` | Filter by report status |
+| `source` | Filter by exact source value, such as `mobile-app` |
+| `tag_id` | Filter by linked tag ID |
+| `reported_from` | Filter reports on or after this reported timestamp |
+| `reported_to` | Filter reports on or before this reported timestamp |
+| `sort_by` | Sort by `created_at`, `reported_at`, `title`, or `status` |
+| `sort_order` | Sort using `asc` or `desc` |
 | `limit` | Page size, from 1 to 100 |
 | `offset` | Number of records to skip |
 
 Example:
 
 ```text
-/api/v1/reports?search=field&limit=20&offset=0
+/api/v1/reports?search=field&status=submitted&source=mobile-app&limit=20&offset=0
 ```
 
 ### GET `/api/v1/reports/{report_id}`
@@ -195,9 +201,13 @@ Supported query parameters:
 
 | Parameter | Purpose |
 |---|---|
+| `search` | Search filename, storage path, and content type |
 | `report_id` | Filter by linked report |
-| `content_type` | Filter by MIME/content type |
-| `search` | Search filename and storage path |
+| `content_type` | Filter by exact MIME/content type |
+| `min_size_bytes` | Filter documents with at least this size |
+| `max_size_bytes` | Filter documents with at most this size |
+| `sort_by` | Sort by `created_at`, `filename`, `content_type`, or `size_bytes` |
+| `sort_order` | Sort using `asc` or `desc` |
 | `limit` | Page size, from 1 to 100 |
 | `offset` | Number of records to skip |
 
@@ -212,6 +222,29 @@ Updates document metadata.
 ### DELETE `/api/v1/documents/{document_id}`
 
 Deletes a document record visible to the authenticated user.
+
+## Pagination Response Shape
+
+List endpoints return a consistent pagination object:
+
+```json
+{
+  "items": [],
+  "pagination": {
+    "total": 25,
+    "limit": 10,
+    "offset": 0,
+    "count": 10,
+    "has_next": true,
+    "has_previous": false,
+    "next_offset": 10,
+    "previous_offset": null
+  }
+}
+```
+
+This gives frontend or mobile clients enough metadata to build paginated list
+views without guessing whether another page exists.
 
 ## OpenAPI Docs
 

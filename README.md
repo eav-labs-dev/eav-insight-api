@@ -25,7 +25,7 @@ Current foundation:
 - Document CRUD endpoints
 - User registration and JWT authentication foundation
 - Organization-scoped report and document access
-- Basic search, filtering, and pagination
+- Advanced search, filtering, sorting, and pagination metadata
 - Dockerfile
 - Docker Compose with PostgreSQL and Redis
 - Pytest test suite
@@ -38,7 +38,8 @@ Planned MVP features:
 - organization and user API endpoints
 - tag management endpoints
 - background processing placeholder
-- richer OpenAPI examples
+- background processing placeholder
+- file upload/storage integration
 - deployment-ready production settings
 
 ## Tech Stack
@@ -211,15 +212,52 @@ make dev
 | POST | `/api/v1/auth/token` | Authenticate and return a bearer token |
 | GET | `/api/v1/auth/me` | Return the current authenticated user |
 | POST | `/api/v1/reports` | Create an authenticated organization-scoped report record |
-| GET | `/api/v1/reports` | List authenticated organization-scoped reports with filters and pagination |
+| GET | `/api/v1/reports` | Search, filter, sort, and paginate organization-scoped reports |
 | GET | `/api/v1/reports/{id}` | Get a report by ID |
 | PATCH | `/api/v1/reports/{id}` | Update a report |
 | DELETE | `/api/v1/reports/{id}` | Delete a report |
 | POST | `/api/v1/documents` | Register an authenticated organization-scoped document record |
-| GET | `/api/v1/documents` | List authenticated organization-scoped documents with filters and pagination |
+| GET | `/api/v1/documents` | Search, filter, sort, and paginate organization-scoped documents |
 | GET | `/api/v1/documents/{id}` | Get a document by ID |
 | PATCH | `/api/v1/documents/{id}` | Update a document |
 | DELETE | `/api/v1/documents/{id}` | Delete a document |
+
+## Search, Filtering, and Pagination
+
+Report and document list endpoints support practical business API query controls.
+
+Reports can be searched and filtered by:
+
+```text
+search
+status
+source
+tag_id
+reported_from
+reported_to
+sort_by
+sort_order
+limit
+offset
+```
+
+Documents can be searched and filtered by:
+
+```text
+search
+report_id
+content_type
+min_size_bytes
+max_size_bytes
+sort_by
+sort_order
+limit
+offset
+```
+
+List responses include pagination metadata with `total`, `count`, `has_next`,
+`has_previous`, `next_offset`, and `previous_offset` so clients can build real
+paginated workflows.
 
 ## Project Structure
 

@@ -1,9 +1,10 @@
 """Report routes scoped to the authenticated user's organization."""
 
-from typing import Annotated
+from datetime import datetime
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import func, or_, select
+from sqlalchemy import ColumnElement, func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.api.dependencies import CurrentUser
@@ -15,6 +16,8 @@ from app.schemas.report import ReportCreate, ReportListResponse, ReportResponse,
 router = APIRouter(prefix="/reports", tags=["reports"])
 
 DbSession = Annotated[Session, Depends(get_db)]
+ReportSortBy = Literal["created_at", "reported_at", "title", "status"]
+SortOrder = Literal["asc", "desc"]
 
 
 def _get_report_or_404(db: Session, report_id: str, organization_id: str) -> Report:
@@ -54,6 +57,16 @@ def _load_tags(db: Session, organization_id: str, tag_ids: list[str]) -> list[Ta
     return tags
 
 
+def _get_report_sort_column(sort_by: ReportSortBy) -> ColumnElement[object]:
+    sort_columns: dict[str, ColumnElement[object]] = {
+        "created_at": Report.created_at,
+        "reported_at": Report.reported_at,
+        "title": Report.title,
+        "status": Report.status,
+    }
+    return sort_columns[sort_by]
+
+
 @router.post("", response_model=ReportResponse, status_code=status.HTTP_201_CREATED)
 def create_report(
     payload: ReportCreate,
@@ -84,15 +97,29 @@ def list_reports(
     db: DbSession,
     current_user: CurrentUser,
     status_filter: Annotated[str | None, Query(alias="status")] = None,
+    source: Annotated[str | None, Query(max_length=80)] = None,
+    tag_id: Annotated[str | None, Query()] = None,
+    reported_from: Annotated[datetime | None, Query()] = None,
+    reported_to: Annotated[datetime | None, Query()] = None,
     search: Annotated[str | None, Query(min_length=2)] = None,
+    sort_by: Annotated[ReportSortBy, Query()] = "created_at",
+    sort_order: Annotated[SortOrder, Query()] = "desc",
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> ReportListResponse:
-    """List reports for the authenticated user's organization."""
+    """List searchable, filterable reports for the current user's organization."""
     filters = [Report.organization_id == current_user.organization_id]
 
     if status_filter is not None:
         filters.append(Report.status == status_filter)
+    if source is not None:
+        filters.append(Report.source == source)
+    if tag_id is not None:
+        filters.append(Report.tags.any(Tag.id == tag_id))
+    if reported_from is not None:
+        filters.append(Report.reported_at >= reported_from)
+    if reported_to is not None:
+        filters.append(Report.reported_at <= reported_to)
     if search is not None:
         pattern = f"%{search}%"
         filters.append(
@@ -105,10 +132,13 @@ def list_reports(
 
     base_query = select(Report).where(*filters)
     total = db.scalar(select(func.count()).select_from(base_query.subquery())) or 0
+
+    sort_column = _get_report_sort_column(sort_by)
+    order_expression = sort_column.asc() if sort_order == "asc" else sort_column.desc()
     reports = list(
         db.scalars(
             base_query.options(selectinload(Report.tags))
-            .order_by(Report.created_at.desc())
+            .order_by(order_expression, Report.created_at.desc())
             .limit(limit)
             .offset(offset)
         )
@@ -116,7 +146,12 @@ def list_reports(
 
     return ReportListResponse(
         items=[ReportResponse.model_validate(report) for report in reports],
-        pagination=PaginationMeta(total=total, limit=limit, offset=offset),
+        pagination=PaginationMeta.from_values(
+            total=total,
+            limit=limit,
+            offset=offset,
+            count=len(reports),
+        ),
     )
 
 

@@ -44,7 +44,11 @@ def seed_organization_and_auth(client: TestClient) -> tuple[str, str, dict[str, 
     try:
         unique_suffix = str(uuid4())[:8]
         organization = Organization(name="EAV Demo", slug=f"eav-demo-{unique_suffix}")
-        tag = Tag(organization=organization, name="Operations", slug=f"operations-{unique_suffix}")
+        tag = Tag(
+            organization=organization,
+            name="Operations",
+            slug=f"operations-{unique_suffix}",
+        )
         db.add_all([organization, tag])
         db.commit()
         db.refresh(organization)
@@ -76,6 +80,23 @@ def seed_organization_and_auth(client: TestClient) -> tuple[str, str, dict[str, 
     access_token = token_response.json()["access_token"]
 
     return organization_id, tag_id, {"Authorization": f"Bearer {access_token}"}
+
+
+def assert_pagination(
+    body: dict[str, object],
+    *,
+    total: int,
+    limit: int,
+    offset: int,
+    count: int,
+) -> None:
+    pagination = body["pagination"]
+    assert pagination["total"] == total
+    assert pagination["limit"] == limit
+    assert pagination["offset"] == offset
+    assert pagination["count"] == count
+    assert pagination["has_next"] is (offset + count < total)
+    assert pagination["has_previous"] is (offset > 0)
 
 
 def test_report_endpoints_require_authentication(client: TestClient) -> None:
@@ -125,7 +146,7 @@ def test_create_list_update_and_delete_report(client: TestClient) -> None:
 
     assert list_response.status_code == 200
     report_list = list_response.json()
-    assert report_list["pagination"] == {"total": 1, "limit": 20, "offset": 0}
+    assert_pagination(report_list, total=1, limit=20, offset=0, count=1)
     assert report_list["items"][0]["id"] == report_id
 
     update_response = client.patch(
@@ -185,7 +206,7 @@ def test_create_list_update_and_delete_document(client: TestClient) -> None:
 
     assert list_response.status_code == 200
     document_list = list_response.json()
-    assert document_list["pagination"] == {"total": 1, "limit": 20, "offset": 0}
+    assert_pagination(document_list, total=1, limit=20, offset=0, count=1)
     assert document_list["items"][0]["id"] == document_id
 
     update_response = client.patch(
@@ -202,6 +223,145 @@ def test_create_list_update_and_delete_document(client: TestClient) -> None:
 
     assert delete_response.status_code == 204
     assert client.get(f"/api/v1/documents/{document_id}", headers=headers).status_code == 404
+
+
+def test_report_search_filter_sort_and_pagination(client: TestClient) -> None:
+    _, tag_id, headers = seed_organization_and_auth(client)
+
+    reports = [
+        {
+            "title": "Inventory Follow Up",
+            "summary": "Mobile field team checked warehouse inventory.",
+            "status": "submitted",
+            "source": "mobile-app",
+            "reported_at": "2026-07-01T09:00:00",
+            "tag_ids": [tag_id],
+        },
+        {
+            "title": "Safety Audit",
+            "summary": "Manual inspection review.",
+            "status": "reviewed",
+            "source": "manual-entry",
+            "reported_at": "2026-07-02T09:00:00",
+        },
+        {
+            "title": "Inventory Archive",
+            "summary": "Archived inventory note from web intake.",
+            "status": "submitted",
+            "source": "web-form",
+            "reported_at": "2026-07-03T09:00:00",
+        },
+    ]
+
+    for report in reports:
+        response = client.post("/api/v1/reports", headers=headers, json=report)
+        assert response.status_code == 201
+
+    filtered_response = client.get(
+        "/api/v1/reports",
+        headers=headers,
+        params={
+            "search": "inventory",
+            "status": "submitted",
+            "source": "mobile-app",
+            "tag_id": tag_id,
+            "reported_from": "2026-07-01T00:00:00",
+            "reported_to": "2026-07-02T00:00:00",
+        },
+    )
+
+    assert filtered_response.status_code == 200
+    filtered_body = filtered_response.json()
+    assert_pagination(filtered_body, total=1, limit=20, offset=0, count=1)
+    assert filtered_body["items"][0]["title"] == "Inventory Follow Up"
+
+    paginated_response = client.get(
+        "/api/v1/reports",
+        headers=headers,
+        params={"sort_by": "title", "sort_order": "asc", "limit": 2, "offset": 0},
+    )
+
+    assert paginated_response.status_code == 200
+    paginated_body = paginated_response.json()
+    assert [item["title"] for item in paginated_body["items"]] == [
+        "Inventory Archive",
+        "Inventory Follow Up",
+    ]
+    assert_pagination(paginated_body, total=3, limit=2, offset=0, count=2)
+    assert paginated_body["pagination"]["has_next"] is True
+    assert paginated_body["pagination"]["next_offset"] == 2
+
+
+def test_document_search_filter_sort_and_pagination(client: TestClient) -> None:
+    _, _, headers = seed_organization_and_auth(client)
+
+    report_response = client.post(
+        "/api/v1/reports",
+        headers=headers,
+        json={"title": "Document Intake Batch"},
+    )
+    assert report_response.status_code == 201
+    report_id = report_response.json()["id"]
+
+    documents = [
+        {
+            "report_id": report_id,
+            "filename": "field-summary.pdf",
+            "content_type": "application/pdf",
+            "storage_path": "demo/field-summary.pdf",
+            "size_bytes": 2048,
+        },
+        {
+            "report_id": report_id,
+            "filename": "invoice.csv",
+            "content_type": "text/csv",
+            "storage_path": "demo/invoice.csv",
+            "size_bytes": 512,
+        },
+        {
+            "report_id": report_id,
+            "filename": "inspection-photo.jpg",
+            "content_type": "image/jpeg",
+            "storage_path": "demo/inspection-photo.jpg",
+            "size_bytes": 8192,
+        },
+    ]
+
+    for document in documents:
+        response = client.post("/api/v1/documents", headers=headers, json=document)
+        assert response.status_code == 201
+
+    filtered_response = client.get(
+        "/api/v1/documents",
+        headers=headers,
+        params={
+            "report_id": report_id,
+            "content_type": "application/pdf",
+            "min_size_bytes": 1024,
+            "max_size_bytes": 4096,
+            "search": "field",
+        },
+    )
+
+    assert filtered_response.status_code == 200
+    filtered_body = filtered_response.json()
+    assert_pagination(filtered_body, total=1, limit=20, offset=0, count=1)
+    assert filtered_body["items"][0]["filename"] == "field-summary.pdf"
+
+    sorted_response = client.get(
+        "/api/v1/documents",
+        headers=headers,
+        params={"sort_by": "size_bytes", "sort_order": "asc", "limit": 2},
+    )
+
+    assert sorted_response.status_code == 200
+    sorted_body = sorted_response.json()
+    assert [item["filename"] for item in sorted_body["items"]] == [
+        "invoice.csv",
+        "field-summary.pdf",
+    ]
+    assert_pagination(sorted_body, total=3, limit=2, offset=0, count=2)
+    assert sorted_body["pagination"]["has_next"] is True
 
 
 def test_users_cannot_read_reports_from_other_organizations(client: TestClient) -> None:
