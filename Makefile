@@ -1,4 +1,4 @@
-.PHONY: install dev test lint format docker-up docker-down db-upgrade db-downgrade db-revision seed clean
+.PHONY: install dev test lint format check ci docker-build docker-up docker-down docker-logs docker-shell docker-migrate docker-seed db-upgrade db-downgrade db-revision migration-check seed clean
 
 install:
 	python -m pip install --upgrade pip
@@ -16,11 +16,30 @@ lint:
 format:
 	ruff format .
 
+check: lint test migration-check
+
+ci: check
+
+docker-build:
+	docker compose build
+
 docker-up:
 	docker compose up --build
 
 docker-down:
 	docker compose down
+
+docker-logs:
+	docker compose logs -f api
+
+docker-shell:
+	docker compose exec api sh
+
+docker-migrate:
+	docker compose exec api alembic upgrade head
+
+docker-seed:
+	docker compose exec api python scripts/seed_demo_data.py
 
 db-upgrade:
 	alembic upgrade head
@@ -31,8 +50,12 @@ db-downgrade:
 db-revision:
 	alembic revision --autogenerate -m "$(message)"
 
+migration-check:
+	DATABASE_URL=sqlite+pysqlite:////tmp/eav_insight_migration_check.db alembic upgrade head
+
 seed:
 	python scripts/seed_demo_data.py
 
 clean:
 	rm -rf .pytest_cache .ruff_cache htmlcov .coverage
+	rm -f /tmp/eav_insight_migration_check.db

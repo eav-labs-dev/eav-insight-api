@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Docker and CI polish with container health checks, migration verification, and Docker image build checks.
+- Development workflow documentation covering host-based and Docker-only setup.
+- Makefile commands for standard verification, Docker build, Docker logs, container migrations, and container seeding.
+- Deployment documentation updates for container runtime, migration, health-check, and CI expectations.
 - Centralized HTTP and validation error handlers.
 - Standard `{ "error": { "code", "message", "details" } }` response envelope.
 - Error response schemas and tests for auth, not-found, and validation failures.

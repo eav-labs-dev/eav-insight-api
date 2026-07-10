@@ -27,11 +27,11 @@ Current foundation:
 - Organization-scoped report and document access
 - Advanced search, filtering, sorting, and pagination metadata
 - Consistent API error response format
-- Dockerfile
-- Docker Compose with PostgreSQL and Redis
+- Dockerfile with non-root runtime user
+- Docker Compose with PostgreSQL, Redis, health checks, and container-safe service URLs
 - Pytest test suite
 - Ruff linting setup
-- GitHub Actions CI workflow
+- GitHub Actions CI workflow with lint, tests, migration check, and Docker build check
 - Documentation folder
 
 Planned MVP features:
@@ -101,10 +101,38 @@ http://localhost:8000/api/v1/health
 
 ## Docker Development
 
+Create the environment file first:
+
+```bash
+cp .env.example .env
+```
+
 Start the API, PostgreSQL, and Redis:
 
 ```bash
 docker compose up --build
+```
+
+The API container overrides `DATABASE_URL` to use the Docker Compose database
+service name, so the container connects to PostgreSQL at `db:5432` while local
+host commands can still use `localhost:5432`.
+
+Run migrations inside the API container:
+
+```bash
+docker compose exec api alembic upgrade head
+```
+
+Seed demo data inside the API container:
+
+```bash
+docker compose exec api python scripts/seed_demo_data.py
+```
+
+Follow API logs:
+
+```bash
+docker compose logs -f api
 ```
 
 Stop services:
@@ -118,6 +146,8 @@ Remove volumes if you want a clean database reset:
 ```bash
 docker compose down -v
 ```
+
+More details are available in [`docs/development.md`](docs/development.md).
 
 ## Authentication Configuration
 
@@ -174,7 +204,7 @@ make db-upgrade
 make seed
 ```
 
-## Test Commands
+## Test and Verification Commands
 
 Run tests:
 
@@ -188,19 +218,36 @@ Run linting:
 ruff check .
 ```
 
+Run a migration check against a temporary SQLite database:
+
+```bash
+DATABASE_URL=sqlite+pysqlite:////tmp/eav_insight_migration_check.db alembic upgrade head
+```
+
+Run the standard local verification suite:
+
+```bash
+make check
+```
+
 Format code:
 
 ```bash
 ruff format .
 ```
 
-Or use the Makefile:
+Useful Makefile commands:
 
 ```bash
 make install
+make dev
 make test
 make lint
-make dev
+make migration-check
+make docker-build
+make docker-up
+make docker-migrate
+make docker-seed
 ```
 
 ## API Endpoints

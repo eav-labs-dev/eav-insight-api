@@ -120,3 +120,17 @@ The first authorization layer is organization scoping:
 - cross-organization report/document links are rejected
 
 Role-aware authorization can be added after the MVP routes stabilize.
+
+## Delivery and Verification Design
+
+The delivery setup is intentionally lightweight but reviewable:
+
+- Dockerfile builds a slim Python runtime image for the API.
+- Docker Compose runs API, PostgreSQL, and Redis for local development.
+- Compose health checks verify PostgreSQL, Redis, and the API health endpoint.
+- Makefile commands provide a consistent developer workflow.
+- GitHub Actions runs linting, tests, Alembic migrations, and a Docker image build.
+
+This keeps the MVP credible for portfolio review because a technical reviewer can
+clone the repository, run the same checks locally, and see the same checks run in
+CI.
