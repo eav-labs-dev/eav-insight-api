@@ -295,6 +295,20 @@ Current standard codes include:
 This makes frontend, mobile, and integration clients easier to build because
 they can consistently read `error.code`, `error.message`, and `error.details`.
 
+## Demo Request Walkthrough
+
+A full reviewer-friendly curl walkthrough is available in [`api-examples.md`](api-examples.md).
+
+After running migrations and seeding demo data, use:
+
+```bash
+make demo-api
+```
+
+This logs in with the seeded demo user, creates a report, registers document
+metadata, exercises search/filter/pagination, and shows the standardized error
+response shape.
+
 ## OpenAPI Docs
 
 FastAPI generates Swagger documentation automatically:

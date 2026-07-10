@@ -22,6 +22,7 @@ def seed(session: Session) -> None:
 
     if existing_org is not None:
         print("Demo data already exists. Skipping seed.")
+        print("Demo login: admin@example.com / ChangeMe123!")
         return
 
     organization = Organization(name="Demo Operations Ltd", slug="demo-operations")
@@ -54,6 +55,7 @@ def seed(session: Session) -> None:
     session.add_all([organization, user, urgent_tag, field_tag, report, document])
     session.commit()
     print("Demo data seeded successfully.")
+    print("Demo login: admin@example.com / ChangeMe123!")
 
 
 def main() -> None:

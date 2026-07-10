@@ -6,6 +6,11 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Reviewer-friendly API demo request walkthrough in `docs/api-examples.md`.
+- `scripts/demo_api_flow.sh` for a curl-based login, report, document, filtering, and error-response demo.
+- `make demo-api` command for quickly exercising the seeded API workflow.
+- Development workflow documentation for host-based, Docker-only, and demo API flows.
+- Seed script output showing local demo login credentials.
 - Docker and CI polish with container health checks, migration verification, and Docker image build checks.
 - Development workflow documentation covering host-based and Docker-only setup.
 - Makefile commands for standard verification, Docker build, Docker logs, container migrations, and container seeding.
