@@ -378,7 +378,9 @@ def test_users_cannot_read_reports_from_other_organizations(client: TestClient) 
 
     cross_org_response = client.get(f"/api/v1/reports/{report_id}", headers=second_headers)
     assert cross_org_response.status_code == 404
-    assert cross_org_response.json()["detail"] == "Report not found."
+    error = cross_org_response.json()["error"]
+    assert error["code"] == "not_found"
+    assert error["message"] == "Report not found."
 
     second_list_response = client.get("/api/v1/reports", headers=second_headers)
     assert second_list_response.status_code == 200
@@ -410,4 +412,48 @@ def test_document_rejects_report_from_another_organization(client: TestClient) -
     )
 
     assert response.status_code == 404
-    assert response.json()["detail"] == "Report not found."
+    error = response.json()["error"]
+    assert error["code"] == "not_found"
+    assert error["message"] == "Report not found."
+
+
+
+def test_validation_errors_use_standard_error_shape(client: TestClient) -> None:
+    _, _, headers = seed_organization_and_auth(client)
+
+    response = client.post(
+        "/api/v1/reports",
+        headers=headers,
+        json={"title": "A"},
+    )
+
+    assert response.status_code == 422
+    error = response.json()["error"]
+    assert error["code"] == "validation_error"
+    assert error["message"] == "Request validation failed."
+    assert error["details"]
+    assert any(detail["field"] == "body.title" for detail in error["details"])
+
+
+def test_not_found_errors_use_standard_error_shape(client: TestClient) -> None:
+    _, _, headers = seed_organization_and_auth(client)
+
+    response = client.get("/api/v1/reports/missing-report-id", headers=headers)
+
+    assert response.status_code == 404
+    error = response.json()["error"]
+    assert error == {
+        "code": "not_found",
+        "message": "Report not found.",
+        "details": [],
+    }
+
+
+def test_auth_errors_use_standard_error_shape(client: TestClient) -> None:
+    response = client.get("/api/v1/reports")
+
+    assert response.status_code == 401
+    error = response.json()["error"]
+    assert error["code"] == "unauthorized"
+    assert error["message"] == "Not authenticated"
+    assert error["details"] == []

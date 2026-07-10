@@ -3,11 +3,12 @@
 from datetime import datetime
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy import ColumnElement, func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.api.dependencies import CurrentUser
+from app.core.exceptions import bad_request, not_found
 from app.db.session import get_db
 from app.models import Report, Tag
 from app.schemas.common import PaginationMeta
@@ -30,10 +31,7 @@ def _get_report_or_404(db: Session, report_id: str, organization_id: str) -> Rep
         )
     )
     if report is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Report not found.",
-        )
+        raise not_found("Report not found.")
     return report
 
 
@@ -50,10 +48,7 @@ def _load_tags(db: Session, organization_id: str, tag_ids: list[str]) -> list[Ta
         )
     )
     if len(tags) != len(set(tag_ids)):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="One or more tags were not found for this organization.",
-        )
+        raise bad_request("One or more tags were not found for this organization.")
     return tags
 
 

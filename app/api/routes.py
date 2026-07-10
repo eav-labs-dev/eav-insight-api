@@ -1,3 +1,5 @@
+"""API route registration."""
+
 from fastapi import APIRouter
 
 from app.api.auth import router as auth_router
@@ -7,6 +9,7 @@ from app.core.config import get_settings
 from app.schemas.health import HealthResponse
 
 router = APIRouter()
+
 router.include_router(auth_router)
 router.include_router(reports_router)
 router.include_router(documents_router)

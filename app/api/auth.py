@@ -2,11 +2,12 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import CurrentUser
+from app.core.exceptions import conflict, forbidden, not_found, unauthorized
 from app.core.security import create_access_token, get_password_hash, verify_password
 from app.db.session import get_db
 from app.models import Organization, User
@@ -26,17 +27,11 @@ def register_user(payload: UserRegister, db: DbSession) -> User:
     """Create a user account for an existing organization."""
     organization = db.get(Organization, payload.organization_id)
     if organization is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Organization not found.",
-        )
+        raise not_found("Organization not found.")
 
     existing_user = _get_user_by_email(db, payload.email)
     if existing_user is not None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="A user with this email already exists.",
-        )
+        raise conflict("A user with this email already exists.")
 
     user = User(
         organization_id=payload.organization_id,
@@ -56,17 +51,10 @@ def create_token(payload: UserLogin, db: DbSession) -> TokenResponse:
     """Authenticate a user and return a bearer token."""
     user = _get_user_by_email(db, payload.email)
     if user is None or not verify_password(payload.password, user.password_hash):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise unauthorized("Invalid email or password.")
 
     if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User account is inactive.",
-        )
+        raise forbidden("User account is inactive.")
 
     access_token = create_access_token(subject=user.id)
     return TokenResponse(access_token=access_token)

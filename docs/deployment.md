@@ -47,3 +47,11 @@ Use a long random `JWT_SECRET_KEY`. Do not reuse the local development value fro
 Protected report and document routes require JWT bearer authentication. Production deployments must keep `JWT_SECRET_KEY` private and rotate it if it is exposed.
 
 Organization scoping is enforced at the API layer using the current user from the bearer token. Deployment smoke tests should include an authenticated request to `/api/v1/reports`.
+
+
+## Error and Observability Notes
+
+The API returns standardized error envelopes for handled HTTP and validation
+errors. Deployment logs should still capture unexpected exceptions through the
+ASGI server/runtime so production debugging does not rely on exposing internal
+tracebacks to API consumers.

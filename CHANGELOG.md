@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Centralized HTTP and validation error handlers.
+- Standard `{ "error": { "code", "message", "details" } }` response envelope.
+- Error response schemas and tests for auth, not-found, and validation failures.
+- README, API, architecture, deployment, and roadmap documentation updates for error handling.
 - Advanced report filters for source, tag, reported date range, sorting, and pagination metadata.
 - Advanced document filters for report, content type, file size range, sorting, and pagination metadata.
 - API tests covering report/document search, filtering, sorting, and paginated responses.

@@ -101,7 +101,9 @@ def test_register_rejects_duplicate_email(client: TestClient) -> None:
     duplicate_response = client.post("/api/v1/auth/register", json=payload)
 
     assert duplicate_response.status_code == 409
-    assert duplicate_response.json()["detail"] == "A user with this email already exists."
+    error = duplicate_response.json()["error"]
+    assert error["code"] == "conflict"
+    assert error["message"] == "A user with this email already exists."
 
 
 def test_login_rejects_invalid_password(client: TestClient) -> None:
@@ -122,7 +124,9 @@ def test_login_rejects_invalid_password(client: TestClient) -> None:
     )
 
     assert response.status_code == 401
-    assert response.json()["detail"] == "Invalid email or password."
+    error = response.json()["error"]
+    assert error["code"] == "unauthorized"
+    assert error["message"] == "Invalid email or password."
 
 
 def test_me_requires_valid_bearer_token(client: TestClient) -> None:
@@ -132,4 +136,6 @@ def test_me_requires_valid_bearer_token(client: TestClient) -> None:
     )
 
     assert response.status_code == 401
-    assert response.json()["detail"] == "Could not validate credentials."
+    error = response.json()["error"]
+    assert error["code"] == "unauthorized"
+    assert error["message"] == "Could not validate credentials."
