@@ -6,7 +6,6 @@ services:
     branch: dev
     autoDeployTrigger: checksPass
     healthCheckPath: /api/v1/health
-    dockerCommand: bash -c 'alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port "$PORT" --proxy-headers'
     envVars:
       - key: APP_NAME
         value: EAV Insight API
