@@ -166,3 +166,9 @@ If this deployment becomes public for longer-term use, change or remove demo cre
 - [ ] Demo data is seeded once, if needed.
 - [ ] `make check-deploy url=<deployed-url>` passes.
 - [ ] README deployment link is updated after the final URL is known.
+
+## Free-tier startup behavior
+
+Render free-tier web services do not support pre-deploy commands. For this deployment, the Dockerfile starts `scripts/start_production.sh`, which runs Alembic migrations and then starts Uvicorn.
+
+This keeps the free-tier deployment simple while still applying migrations before the API starts.

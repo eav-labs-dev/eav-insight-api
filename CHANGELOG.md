@@ -1,3 +1,10 @@
+
+## Unreleased
+
+### Fixed
+
+- Updated Render deployment startup to use a Dockerfile production start script instead of a Render Docker command override.
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
