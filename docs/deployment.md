@@ -26,3 +26,17 @@ Deployment is not yet finalized. This document tracks the deployment requirement
 ## Deployment Direction
 
 The first public deployment should prioritize reliability and simple reviewability over complex infrastructure. A small container-friendly platform or VM is sufficient for the MVP.
+
+
+## Authentication Secrets
+
+Production-like deployments must provide these authentication values through the hosting provider secret/environment configuration:
+
+```text
+JWT_SECRET_KEY
+JWT_ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES
+PASSWORD_HASH_ITERATIONS
+```
+
+Use a long random `JWT_SECRET_KEY`. Do not reuse the local development value from `.env.example`.

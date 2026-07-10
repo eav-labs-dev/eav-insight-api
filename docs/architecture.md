@@ -13,7 +13,7 @@ FastAPI app
   ↓
 Versioned API routes: /api/v1
   ↓
-Schemas and services
+Schemas, auth dependencies, and route logic
   ↓
 SQLAlchemy models
   ↓
@@ -36,6 +36,9 @@ Redis planned for background processing workflows
 
 ## Current API Components
 
+- auth registration, token, and current-user routes
+- bearer-token current-user dependency
+- password hashing and JWT helpers
 - report CRUD routes
 - document CRUD routes
 - request/response schemas
@@ -49,9 +52,20 @@ Redis planned for background processing workflows
 - service layer extraction if route complexity grows
 - tag management endpoints
 - organization and user endpoints
-- authentication and authorization foundation
+- organization-scoped authorization checks
 - background processing placeholder using Redis
 - file upload/storage integration
+
+## Authentication Design
+
+The current authentication layer is intentionally small but functional:
+
+- users register under an existing organization
+- passwords are stored as salted PBKDF2-SHA256 hashes
+- login returns a signed JWT bearer token
+- `/auth/me` validates the token and returns the current user
+
+Authorization is not fully enforced across business endpoints yet. The next step is to protect write operations and scope all report/document access by organization.
 
 ## Engineering Notes
 

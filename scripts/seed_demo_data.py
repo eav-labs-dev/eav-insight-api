@@ -9,6 +9,7 @@ Run after applying migrations:
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.security import get_password_hash
 from app.db.session import SessionLocal
 from app.models import Document, Organization, Report, Tag, User
 
@@ -28,6 +29,7 @@ def seed(session: Session) -> None:
         organization=organization,
         email="admin@example.com",
         full_name="Demo Admin",
+        password_hash=get_password_hash("ChangeMe123!"),
         role="admin",
     )
     urgent_tag = Tag(organization=organization, name="Urgent", slug="urgent")

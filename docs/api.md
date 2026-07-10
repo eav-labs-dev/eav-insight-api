@@ -34,6 +34,72 @@ Example response:
 }
 ```
 
+
+## Authentication
+
+### POST `/api/v1/auth/register`
+
+Creates a user account under an existing organization. The organization must already exist.
+
+Example request:
+
+```json
+{
+  "organization_id": "organization-uuid",
+  "email": "admin@example.com",
+  "full_name": "Demo Admin",
+  "password": "ChangeMe123!",
+  "role": "admin"
+}
+```
+
+Example response:
+
+```json
+{
+  "id": "user-uuid",
+  "organization_id": "organization-uuid",
+  "email": "admin@example.com",
+  "full_name": "Demo Admin",
+  "role": "admin",
+  "is_active": true,
+  "created_at": "2026-07-10T00:00:00Z",
+  "updated_at": "2026-07-10T00:00:00Z"
+}
+```
+
+### POST `/api/v1/auth/token`
+
+Authenticates a user and returns a bearer token.
+
+Example request:
+
+```json
+{
+  "email": "admin@example.com",
+  "password": "ChangeMe123!"
+}
+```
+
+Example response:
+
+```json
+{
+  "access_token": "jwt-token",
+  "token_type": "bearer"
+}
+```
+
+### GET `/api/v1/auth/me`
+
+Returns the current authenticated user.
+
+Required header:
+
+```text
+Authorization: Bearer <access_token>
+```
+
 ## Reports
 
 ### POST `/api/v1/reports`
@@ -159,7 +225,7 @@ See [`database.md`](database.md) for table and migration notes.
 
 ## Planned API Areas
 
-- authentication
+- organization-scoped authorization
 - organizations
 - users
 - tags

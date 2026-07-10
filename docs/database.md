@@ -11,7 +11,7 @@ This gives the project a real backend domain model instead of only a framework s
 | Table | Purpose |
 |---|---|
 | `organizations` | Business workspace or client account |
-| `users` | User records scoped to an organization |
+| `users` | User records scoped to an organization, including password hash storage |
 | `reports` | Operational reports and searchable business records |
 | `documents` | Files attached to organizations and reports |
 | `tags` | Organization-specific labels for reports |
@@ -77,3 +77,10 @@ make seed
 - Report status is currently stored as a string to keep the first migration simple and portable.
 - Tags are unique per organization by `organization_id` and `slug`.
 - Documents can exist at the organization level and may optionally link to a report.
+
+
+## Authentication Storage
+
+The `users` table now includes `password_hash` for storing salted password hashes. Plaintext passwords must never be committed, logged, stored, or returned from API responses.
+
+The demo seed user uses a local-only password documented in the seed script and should not be treated as a production credential.

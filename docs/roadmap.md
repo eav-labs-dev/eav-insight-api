@@ -26,13 +26,22 @@
 
 - [x] add report CRUD endpoints
 - [x] add document CRUD endpoints
-- [ ] add tag support
+- [ ] add tag management endpoints
 - [x] add search and filtering
 - [x] add pagination
-- [ ] add basic auth foundation
+- [x] add basic auth foundation
 - [x] document API examples
 
-## Phase 4 — Portfolio Polish
+## Phase 4 — Authorization and Organization Workflows
+
+- [ ] protect write endpoints with authenticated users
+- [ ] add organization-scoped access checks
+- [ ] add organization API endpoints
+- [ ] add user management endpoints
+- [ ] add tag management endpoints
+- [ ] add role-aware authorization helpers
+
+## Phase 5 — Portfolio Polish
 
 - [ ] add CI badge
 - [ ] add architecture diagram

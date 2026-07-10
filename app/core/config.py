@@ -22,6 +22,19 @@ class Settings(BaseSettings):
         default="http://localhost:3000,http://localhost:5173",
         alias="CORS_ORIGINS",
     )
+    jwt_secret_key: str = Field(
+        default="change-this-local-development-secret",
+        alias="JWT_SECRET_KEY",
+    )
+    jwt_algorithm: str = Field(default="HS256", alias="JWT_ALGORITHM")
+    access_token_expire_minutes: int = Field(
+        default=30,
+        alias="ACCESS_TOKEN_EXPIRE_MINUTES",
+    )
+    password_hash_iterations: int = Field(
+        default=600000,
+        alias="PASSWORD_HASH_ITERATIONS",
+    )
 
     @property
     def cors_origins_list(self) -> list[str]:
