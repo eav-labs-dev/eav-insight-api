@@ -6,6 +6,16 @@ FastAPI backend for document intake, operational reporting, and searchable busin
 
 This repository is part of the EAV Labs portfolio rebuild and is currently under active development.
 
+## Live Demo
+
+The API is deployed on Render:
+
+- Base URL: `https://eav-insight-api.onrender.com`
+- Health check: `https://eav-insight-api.onrender.com/api/v1/health`
+- OpenAPI docs: `https://eav-insight-api.onrender.com/docs`
+
+This deployment is intended as a portfolio demo environment for reviewing the API structure, documentation, and backend workflow.
+
 ## What This Project Demonstrates
 
 EAV Insight API is designed as a production-style backend service. It demonstrates backend API design, typed Python development, environment-based configuration, Dockerized local development, automated testing, CI, and documentation discipline.
@@ -301,23 +311,23 @@ Detailed deployment steps are documented in [`docs/deployment-render.md`](docs/d
 
 ## API Endpoints
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/` | Basic service metadata |
-| GET | `/api/v1/health` | Health check endpoint |
-| POST | `/api/v1/auth/register` | Register a user under an organization |
-| POST | `/api/v1/auth/token` | Authenticate and return a bearer token |
-| GET | `/api/v1/auth/me` | Return the current authenticated user |
-| POST | `/api/v1/reports` | Create an authenticated organization-scoped report record |
-| GET | `/api/v1/reports` | Search, filter, sort, and paginate organization-scoped reports |
-| GET | `/api/v1/reports/{id}` | Get a report by ID |
-| PATCH | `/api/v1/reports/{id}` | Update a report |
-| DELETE | `/api/v1/reports/{id}` | Delete a report |
-| POST | `/api/v1/documents` | Register an authenticated organization-scoped document record |
-| GET | `/api/v1/documents` | Search, filter, sort, and paginate organization-scoped documents |
-| GET | `/api/v1/documents/{id}` | Get a document by ID |
-| PATCH | `/api/v1/documents/{id}` | Update a document |
-| DELETE | `/api/v1/documents/{id}` | Delete a document |
+| Method | Endpoint                 | Description                                                      |
+| ------ | ------------------------ | ---------------------------------------------------------------- |
+| GET    | `/`                      | Basic service metadata                                           |
+| GET    | `/api/v1/health`         | Health check endpoint                                            |
+| POST   | `/api/v1/auth/register`  | Register a user under an organization                            |
+| POST   | `/api/v1/auth/token`     | Authenticate and return a bearer token                           |
+| GET    | `/api/v1/auth/me`        | Return the current authenticated user                            |
+| POST   | `/api/v1/reports`        | Create an authenticated organization-scoped report record        |
+| GET    | `/api/v1/reports`        | Search, filter, sort, and paginate organization-scoped reports   |
+| GET    | `/api/v1/reports/{id}`   | Get a report by ID                                               |
+| PATCH  | `/api/v1/reports/{id}`   | Update a report                                                  |
+| DELETE | `/api/v1/reports/{id}`   | Delete a report                                                  |
+| POST   | `/api/v1/documents`      | Register an authenticated organization-scoped document record    |
+| GET    | `/api/v1/documents`      | Search, filter, sort, and paginate organization-scoped documents |
+| GET    | `/api/v1/documents/{id}` | Get a document by ID                                             |
+| PATCH  | `/api/v1/documents/{id}` | Update a document                                                |
+| DELETE | `/api/v1/documents/{id}` | Delete a document                                                |
 
 ## Search, Filtering, and Pagination
 
@@ -355,7 +365,6 @@ offset
 List responses include pagination metadata with `total`, `count`, `has_next`,
 `has_previous`, `next_offset`, and `previous_offset` so clients can build real
 paginated workflows.
-
 
 ## Error Response Format
 
