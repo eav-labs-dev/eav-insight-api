@@ -1,16 +1,38 @@
+# Python
 __pycache__/
 *.py[cod]
-.env
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtual environments
 .venv/
 venv/
+env/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Test and coverage
 .pytest_cache/
-.mypy_cache/
-.ruff_cache/
 .coverage
 htmlcov/
-dist/
-build/
-*.egg-info/
+coverage.xml
+
+# Tool caches
+.ruff_cache/
+.mypy_cache/
+
+# Editor / OS
 .DS_Store
 .idea/
 .vscode/
+
+# Docker / local data
+postgres-data/
+redis-data/

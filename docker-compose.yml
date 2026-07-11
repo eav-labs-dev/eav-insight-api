@@ -1,0 +1,65 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eav-insight-api
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://eav:eav_password@db:5432/eav_insight
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --proxy-headers
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          python -c "import urllib.request;
+          urllib.request.urlopen('http://localhost:8000/api/v1/health', timeout=5)"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  db:
+    image: postgres:16-alpine
+    container_name: eav-insight-db
+    environment:
+      POSTGRES_DB: eav_insight
+      POSTGRES_USER: eav
+      POSTGRES_PASSWORD: eav_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - eav_insight_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eav -d eav_insight"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: eav-insight-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - eav_insight_redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  eav_insight_postgres:
+  eav_insight_redis:
