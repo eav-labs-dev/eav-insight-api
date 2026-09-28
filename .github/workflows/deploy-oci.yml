@@ -49,7 +49,7 @@ jobs:
             git fetch origin main
             git checkout main
             git reset --hard origin/main
-            docker compose --env-file .env.production -f compose.prod.yml up -d --build --remove-orphans
+            docker compose -p eav-insight --env-file .env.production -f compose.prod.yml up -d --build --remove-orphans
             docker image prune -f
 
             ready=false
@@ -67,7 +67,7 @@ jobs:
 
             if [ "$ready" != "true" ]; then
               echo "Insight did not become ready within 120 seconds."
-              docker compose --env-file .env.production -f compose.prod.yml ps
+              docker compose -p eav-insight --env-file .env.production -f compose.prod.yml ps
               docker logs eav-insight-api --tail 200
               exit 1
             fi
