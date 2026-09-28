@@ -1,0 +1,80 @@
+name: Deploy to OCI
+
+on:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oci-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_KEY_HEX: ${{ secrets.OCI_DEPLOY_SSH_KEY_HEX }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.OCI_DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s' "$DEPLOY_SSH_KEY_HEX" | xxd -r -p > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+          ssh-keygen -y -f ~/.ssh/id_ed25519 > /dev/null
+
+      - name: Deploy main to OCI
+        env:
+          DEPLOY_HOST: ${{ secrets.OCI_DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.OCI_DEPLOY_USER }}
+        run: |
+          ssh -T -i ~/.ssh/id_ed25519 "${DEPLOY_USER}@${DEPLOY_HOST}" 'bash -se' <<'EOF'
+            set -euo pipefail
+            cd /opt/eav/insight/app
+            git fetch origin main
+            git checkout main
+            git reset --hard origin/main
+            docker compose --env-file .env.production -f compose.prod.yml up -d --build --remove-orphans
+            docker image prune -f
+
+            ready=false
+            for attempt in $(seq 1 24); do
+              if curl --fail --silent --show-error http://127.0.0.1:8000/api/v1/health; then
+                echo
+                echo "Insight health check passed."
+                ready=true
+                break
+              fi
+
+              echo "Insight is not ready yet (attempt ${attempt}/24); retrying in 5 seconds..."
+              sleep 5
+            done
+
+            if [ "$ready" != "true" ]; then
+              echo "Insight did not become ready within 120 seconds."
+              docker compose --env-file .env.production -f compose.prod.yml ps
+              docker logs eav-insight-api --tail 200
+              exit 1
+            fi
+
+            echo "OCI_DEPLOY_OK"
+          EOF
+
+      - name: Verify public HTTPS health
+        run: |
+          curl --fail --retry 12 --retry-delay 5 https://insight.env.pm/api/v1/health
