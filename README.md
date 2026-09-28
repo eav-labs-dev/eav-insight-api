@@ -6,17 +6,15 @@ FastAPI backend for document intake, operational reporting, and searchable busin
 
 ## Project Status
 
-This repository is part of the EAV Labs portfolio rebuild and is currently under active development.
+The portfolio MVP is deployed from `main` to Oracle Cloud Infrastructure through GitHub Actions.
 
 ## Live Demo
 
-The API is deployed on Render:
+- Base URL: [https://insight.env.pm](https://insight.env.pm)
+- Health check: [https://insight.env.pm/api/v1/health](https://insight.env.pm/api/v1/health)
+- OpenAPI docs: [https://insight.env.pm/docs](https://insight.env.pm/docs)
 
-- Base URL: `https://eav-insight-api.onrender.com`
-- Health check: `https://eav-insight-api.onrender.com/api/v1/health`
-- OpenAPI docs: `https://eav-insight-api.onrender.com/docs`
-
-This deployment is intended as a portfolio demo environment for reviewing the API structure, documentation, and backend workflow.
+The production stack runs FastAPI and PostgreSQL 17 with Docker Compose on an OCI ARM64 VM, with Caddy providing HTTPS and reverse proxying. Redis remains part of local development configuration but is intentionally omitted from production because the current application code does not consume it.
 
 <!-- EAV_SCREENSHOTS_START -->
 ## Screenshots
@@ -72,10 +70,11 @@ Planned MVP features:
 - PostgreSQL
 - Redis
 - Docker / Docker Compose
+- Oracle Cloud Infrastructure (ARM64)
+- Caddy reverse proxy and automatic HTTPS
 - Pytest
 - Ruff
 - GitHub Actions
-- Render deployment target
 
 ## Local Development
 
@@ -303,23 +302,27 @@ make check-deploy url=https://your-service-name.onrender.com
 
 ## Deployment
 
-The first public deployment target is Render using Docker and Render Postgres. The repository includes a Render Blueprint and release script:
+Production runs on an Oracle Cloud Infrastructure ARM64 VM with Docker Compose:
 
 ```text
-render.yaml
-scripts/render_release.sh
-scripts/check_deployment.sh
+GitHub main
+   ↓
+GitHub Actions
+   ↓ SSH
+OCI Ubuntu VM
+   ↓
+Docker Compose
+   ├── EAV Insight API
+   └── PostgreSQL 17
+   ↓
+Caddy
+   ↓
+https://insight.env.pm
 ```
 
-The deployment uses `/api/v1/health` as the platform health check and runs Alembic migrations before the service starts. Render injects `DATABASE_URL` from the managed PostgreSQL database and generates `JWT_SECRET_KEY` through the Blueprint.
+The production startup script runs `alembic upgrade head` before starting Uvicorn, so database migrations are applied automatically during deployment. The API binds only to `127.0.0.1:8000` on the host and is exposed publicly through Caddy over HTTPS.
 
-After deployment, verify the live API with:
-
-```bash
-make check-deploy url=https://your-service-name.onrender.com
-```
-
-Detailed deployment steps are documented in [`docs/deployment-render.md`](docs/deployment-render.md).
+The repository still retains the previous Render deployment assets for reference, but OCI is the active production target.
 
 ## API Endpoints
 
