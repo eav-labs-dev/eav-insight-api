@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: eav-insight-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: eav_insight
+      POSTGRES_USER: eav
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - eav_insight_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eav -d eav_insight"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eav-insight-api
+    restart: unless-stopped
+    environment:
+      APP_NAME: "EAV Insight API"
+      ENVIRONMENT: production
+      DEBUG: "false"
+      API_V1_PREFIX: /api/v1
+      DATABASE_URL: postgresql+psycopg://eav:${POSTGRES_PASSWORD}@db:5432/eav_insight
+      REDIS_URL: redis://localhost:6379/0
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: "30"
+      PASSWORD_HASH_ITERATIONS: "600000"
+      PORT: "8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          python -c "import urllib.request;
+          urllib.request.urlopen('http://localhost:8000/api/v1/health', timeout=5)"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+volumes:
+  eav_insight_postgres:
+    name: eav_insight_postgres
