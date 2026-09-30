@@ -52,4 +52,5 @@ services:
 
 volumes:
   eav_insight_postgres:
+    external: true
     name: eav_insight_postgres
