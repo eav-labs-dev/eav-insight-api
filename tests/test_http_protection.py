@@ -1,11 +1,14 @@
 """HTTP throttling and request-size contract tests."""
 
+import asyncio
 from collections.abc import Generator
+from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
 
 from app.core.config import get_settings
+from app.core.http_protection import HttpProtectionMiddleware
 from app.main import create_app
 
 
@@ -46,3 +49,48 @@ def test_oversized_body_returns_stable_413(protected_client: TestClient) -> None
 
     assert response.status_code == 413
     assert response.json()["error"]["code"] == "request_too_large"
+
+
+def test_limit_resets_after_window() -> None:
+    now = [1_000.0]
+
+    async def app(scope: dict[str, Any], receive: Any, send: Any) -> None:
+        await receive()
+        await send({"type": "http.response.start", "status": 204, "headers": []})
+        await send({"type": "http.response.body", "body": b""})
+
+    middleware = HttpProtectionMiddleware(
+        app,
+        api_limit=1,
+        auth_limit=1,
+        max_body_bytes=32,
+        clock=lambda: now[0],
+    )
+
+    async def request() -> int:
+        incoming = [{"type": "http.request", "body": b"", "more_body": False}]
+        outgoing: list[dict[str, Any]] = []
+
+        async def receive() -> dict[str, Any]:
+            return incoming.pop(0)
+
+        async def send(message: dict[str, Any]) -> None:
+            outgoing.append(message)
+
+        await middleware(
+            {
+                "type": "http",
+                "method": "GET",
+                "path": "/api/v1/reports",
+                "headers": [],
+                "client": ("203.0.113.10", 50000),
+            },
+            receive,
+            send,
+        )
+        return outgoing[0]["status"]
+
+    assert asyncio.run(request()) == 204
+    assert asyncio.run(request()) == 429
+    now[0] += 60
+    assert asyncio.run(request()) == 204
