@@ -8,4 +8,5 @@ echo "Starting EAV Insight API..."
 exec uvicorn app.main:app \
   --host 0.0.0.0 \
   --port "${PORT:-8000}" \
+  --timeout-keep-alive "${UVICORN_KEEP_ALIVE_TIMEOUT_SECONDS:-5}" \
   --proxy-headers

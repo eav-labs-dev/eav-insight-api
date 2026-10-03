@@ -47,6 +47,10 @@ The Blueprint defines a Docker web service and PostgreSQL database. It uses `/ap
 | `JWT_ALGORITHM` | JWT signing algorithm |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | access token lifetime |
 | `PASSWORD_HASH_ITERATIONS` | PBKDF2 password hashing iteration count |
+| `API_RATE_LIMIT_PER_MINUTE` | per-client business API limit; defaults to `120` |
+| `AUTH_RATE_LIMIT_PER_MINUTE` | stricter registration/token limit; defaults to `10` |
+| `MAX_REQUEST_BODY_BYTES` | maximum API request body; defaults to `1048576` (1 MiB) |
+| `UVICORN_KEEP_ALIVE_TIMEOUT_SECONDS` | idle keep-alive timeout; defaults to `5` seconds |
 
 ## Container Deployment Direction
 
@@ -139,3 +143,8 @@ Render is configured to auto-deploy after checks pass.
 ## Error and Observability Notes
 
 The API returns standardized error envelopes for handled HTTP and validation errors. Deployment logs should still capture unexpected exceptions through the ASGI server/runtime so production debugging does not rely on exposing internal tracebacks to API consumers.
+
+Application middleware throttles authentication and business requests independently, while
+leaving `/api/v1/health` available to deployment probes. Caddy should enforce complementary
+connection, header, and body controls at the edge. The current limiter is process-local and
+must move to a shared store before running multiple API replicas.
