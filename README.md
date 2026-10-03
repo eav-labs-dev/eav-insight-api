@@ -47,6 +47,8 @@ Current foundation:
 - Organization-scoped report and document access
 - Advanced search, filtering, sorting, and pagination metadata
 - Consistent API error response format
+- Per-client API and stricter authentication throttling with stable HTTP 429 responses
+- Configurable request-body protection with health-check exemption
 - Dockerfile with non-root runtime user
 - Docker Compose with PostgreSQL, Redis, health checks, and container-safe service URLs
 - Pytest test suite
@@ -225,6 +227,18 @@ curl -H "Authorization: Bearer <access_token>" \
 ```
 
 Report and document endpoints now require bearer authentication. Records are automatically scoped to the authenticated user's organization, so clients do not send `organization_id` when creating reports or documents.
+
+## HTTP Safeguards
+
+Authentication registration/token requests default to `10` requests per client per minute;
+other `/api/` routes default to `120`. Limit breaches use the standard error envelope, return
+HTTP `429`, and include `Retry-After` plus rate-limit headers. `/api/v1/health` is exempt so
+deployment checks remain reliable. Request bodies are bounded to `1 MiB` by default.
+
+Configure the limits with `AUTH_RATE_LIMIT_PER_MINUTE`, `API_RATE_LIMIT_PER_MINUTE`, and
+`MAX_REQUEST_BODY_BYTES`. These process-local limits suit the single OCI MVP instance; use a
+shared Redis-backed limiter before horizontally scaling. Caddy remains responsible for edge
+connection, header, and complementary body protections.
 
 ## Database Commands
 
