@@ -17,6 +17,12 @@ AUTH_PATHS = {"/api/v1/auth/register", "/api/v1/auth/token"}
 HEALTH_PATHS = {"/api/v1/health"}
 WINDOW_SECONDS = 60
 STALE_BUCKET_THRESHOLD = 10_000
+SECURITY_HEADERS = [
+    (b"x-content-type-options", b"nosniff"),
+    (b"x-frame-options", b"DENY"),
+    (b"referrer-policy", b"no-referrer"),
+    (b"permissions-policy", b"camera=(), microphone=(), geolocation=()"),
+]
 
 
 @dataclass(frozen=True)
@@ -54,15 +60,20 @@ class HttpProtectionMiddleware:
             await self.app(scope, receive, send)
             return
 
+        async def secure_send(message: Message) -> None:
+            if message["type"] == "http.response.start":
+                message.setdefault("headers", []).extend(SECURITY_HEADERS)
+            await send(message)
+
         path = str(scope.get("path", ""))
         if not path.startswith("/api/") or path in HEALTH_PATHS:
-            await self.app(scope, receive, send)
+            await self.app(scope, receive, secure_send)
             return
 
         content_length = self._content_length(scope)
         if content_length is not None and content_length > self.max_body_bytes:
             await self._send_error(
-                send,
+                secure_send,
                 status_code=413,
                 code="request_too_large",
                 message="Request body exceeds the configured limit.",
@@ -80,7 +91,7 @@ class HttpProtectionMiddleware:
             received_bytes += len(message.get("body", b""))
             if received_bytes > self.max_body_bytes:
                 await self._send_error(
-                    send,
+                    secure_send,
                     status_code=413,
                     code="request_too_large",
                     message="Request body exceeds the configured limit.",
@@ -107,7 +118,7 @@ class HttpProtectionMiddleware:
         ]
         if not allowed:
             await self._send_error(
-                send,
+                secure_send,
                 status_code=429,
                 code="rate_limit_exceeded",
                 message="Too many requests. Retry after the current rate-limit window.",
@@ -123,7 +134,7 @@ class HttpProtectionMiddleware:
         async def add_rate_headers(message: Message) -> None:
             if message["type"] == "http.response.start":
                 message.setdefault("headers", []).extend(rate_headers)
-            await send(message)
+            await secure_send(message)
 
         await self.app(scope, replay_receive, add_rate_headers)
 

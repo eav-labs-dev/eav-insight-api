@@ -240,6 +240,9 @@ Configure the limits with `AUTH_RATE_LIMIT_PER_MINUTE`, `API_RATE_LIMIT_PER_MINU
 shared Redis-backed limiter before horizontally scaling. Caddy remains responsible for edge
 connection, header, and complementary body protections.
 
+Every HTTP response includes `nosniff`, anti-framing, no-referrer, and restrictive
+browser-feature headers. HSTS remains at Caddy because that edge terminates HTTPS.
+
 ## Database Commands
 
 Start PostgreSQL only:

@@ -3,7 +3,7 @@
 ```md id="rbehbg"
 ### Added
 
-- Application-level API and stricter authentication throttling with stable HTTP 429 responses, health-check exemption, configurable request limits, and request-body protection.
+- Application-level API and stricter authentication throttling with stable HTTP 429 responses, health-check exemption, configurable request limits, request-body protection, and defensive response headers.
 
 - Added CI badge and reviewer screenshots for the live API, Swagger docs, Render deployment, and GitHub Actions.
 

@@ -36,7 +36,15 @@ def test_auth_limit_returns_stable_429(protected_client: TestClient) -> None:
 
 
 def test_health_endpoint_is_exempt(protected_client: TestClient) -> None:
-    assert protected_client.get("/api/v1/health").status_code == 200
+    response = protected_client.get("/api/v1/health")
+
+    assert response.status_code == 200
+    assert response.headers["x-content-type-options"] == "nosniff"
+    assert response.headers["x-frame-options"] == "DENY"
+    assert response.headers["referrer-policy"] == "no-referrer"
+    assert response.headers["permissions-policy"] == (
+        "camera=(), microphone=(), geolocation=()"
+    )
     assert protected_client.get("/api/v1/health").status_code == 200
 
 

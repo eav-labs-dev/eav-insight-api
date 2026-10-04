@@ -148,3 +148,7 @@ Application middleware throttles authentication and business requests independen
 leaving `/api/v1/health` available to deployment probes. Caddy should enforce complementary
 connection, header, and body controls at the edge. The current limiter is process-local and
 must move to a shared store before running multiple API replicas.
+
+The ASGI middleware also emits `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`,
+and `Permissions-Policy` on normal, health, and rejected responses. Configure HSTS at Caddy,
+where HTTPS terminates, rather than in the application.
