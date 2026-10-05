@@ -8,6 +8,7 @@ from app.api.documents import router as documents_router
 from app.api.reports import router as reports_router
 from app.core.config import get_settings
 from app.core.error_handlers import register_exception_handlers
+from app.core.http_protection import HttpProtectionMiddleware
 from app.schemas.health import HealthResponse
 
 
@@ -25,6 +26,13 @@ def create_app() -> FastAPI:
     )
 
     register_exception_handlers(app)
+
+    app.add_middleware(
+        HttpProtectionMiddleware,
+        api_limit=settings.api_rate_limit_per_minute,
+        auth_limit=settings.auth_rate_limit_per_minute,
+        max_body_bytes=settings.max_request_body_bytes,
+    )
 
     app.add_middleware(
         CORSMiddleware,

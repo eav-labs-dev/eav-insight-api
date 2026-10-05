@@ -26,6 +26,11 @@ jobs:
     timeout-minutes: 20
 
     steps:
+      - name: Check out deployment verifier
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
       - name: Configure SSH
         env:
           DEPLOY_SSH_KEY_HEX: ${{ secrets.OCI_DEPLOY_SSH_KEY_HEX }}
@@ -75,6 +80,5 @@ jobs:
             echo "OCI_DEPLOY_OK"
           EOF
 
-      - name: Verify public HTTPS health
-        run: |
-          curl --fail --retry 12 --retry-delay 5 https://insight.env.pm/api/v1/health
+      - name: Verify public HTTPS health and security headers
+        run: ./scripts/verify_http_security.sh https://insight.env.pm/api/v1/health

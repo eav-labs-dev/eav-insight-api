@@ -35,6 +35,21 @@ class Settings(BaseSettings):
         default=600000,
         alias="PASSWORD_HASH_ITERATIONS",
     )
+    api_rate_limit_per_minute: int = Field(
+        default=120,
+        ge=1,
+        alias="API_RATE_LIMIT_PER_MINUTE",
+    )
+    auth_rate_limit_per_minute: int = Field(
+        default=10,
+        ge=1,
+        alias="AUTH_RATE_LIMIT_PER_MINUTE",
+    )
+    max_request_body_bytes: int = Field(
+        default=1048576,
+        ge=1,
+        alias="MAX_REQUEST_BODY_BYTES",
+    )
 
     @property
     def cors_origins_list(self) -> list[str]:
