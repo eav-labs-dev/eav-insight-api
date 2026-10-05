@@ -152,3 +152,5 @@ must move to a shared store before running multiple API replicas.
 The ASGI middleware also emits `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`,
 and `Permissions-Policy` on normal, health, and rejected responses. Configure HSTS at Caddy,
 where HTTPS terminates, rather than in the application.
+After each OCI deployment, the workflow checks the public health endpoint and fails unless
+all four defensive headers survive the complete HTTPS/Caddy path.
